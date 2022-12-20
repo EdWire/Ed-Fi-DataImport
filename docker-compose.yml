@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+  dataimport.web:
+    image: dataimportweb
+    build:
+      context: .
+      dockerfile: DataImport.Web/Dockerfile
+    container_name: dataimport.web
+    restart: unless-stopped
+    volumes:
+      - /c/shared/dataimport/temp:/tmp/dataimport/share
+      #- c/work/shared/dataimport/temp:/tmp/dataimport/share
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AppSettings__DatabaseEngine=SqlServer
+      - AppSettings__Mode=InstanceYearSpecific
+      - AppSettings__AllowTestCertificates=true
+      - AppSettings__ShareName=/tmp/dataimport/share
+      - IdentitySettings__Type=OpenId
+      #- IdentitySettings__OpenIdSettings__Authority=http://localhost:5305
+      - IdentitySettings__OpenIdSettings__Authority=http://host.docker.internal:5305
+      - IdentitySettings__OpenIdSettings__ClientId=PRtnafAZfKk48H486SBBqcCVDgGs5ryP
+      - IdentitySettings__OpenIdSettings__Secret=HOr3HeTlLchh9Xv3TSG2
+      #- IdentitySettings__OpenIdSettings__UserProfile=http://localhost:5305/manage
+      - IdentitySettings__OpenIdSettings__UserProfile=http://host.docker.internal:5305/manage
+      - IdentitySettings__OpenIdSettings__Scopes__2=profile
+      - IdentitySettings__OpenIdSettings__Scopes__3=role
+      - IdentitySettings__OpenIdSettings__Scopes__4=offline_access
+      - IdentitySettings__OpenIdSettings__Scopes__5=https://api.edgraph.com/auth/tenant
+      - IdentitySettings__OpenIdSettings__RoleClaimValue=DataImport.Admin
+      - Instance__JwtInstanceIdKey=tenantid
+      - EdGraph__Enabled=yes
+      - EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-local-scus
+      - EdGraph__Instance__UserProfileInstanceIdKey=selectedtenantid
+      #- EdGraph__Instance__UserProfileUri=http://localhost:5102/me
+      - EdGraph__Instance__InstanceSwitchUri=http://localhost:5305/account/switchtenant
+      - EdGraph__Instance__InstanceSwitchRedirectUri=http://localhost:56322
+      - EdGraph__Instance__UserProfileUri=http://host.docker.internal:5102/me
+      #- EdGraph__Instance__InstanceSwitchUri=http://host.docker.internal:5305/account/switchtenant
+      #- EdGraph__Instance__InstanceSwitchRedirectUri=http://host.docker.internal:56322
+      - ConnectionStrings__defaultConnection=Server=host.docker.internal,1433; Database=EdFi_{0}; User ID=sa;Password=Lp&Oly3Jq!9Z0rG@;
+    ports:
+      - "56322:80"
+      #- "56323:81"
+    networks:
+      - edgraph
+
+networks:
+  edgraph:
+    name: edgraph-network
+    external: true

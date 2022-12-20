@@ -111,6 +111,18 @@ namespace DataImport.Web.Areas.Identity
                     RoleClaimType = openIdSettings.ClaimTypeMappings.RoleClaimType
                 };
 
+                // dev no-cert\http-only docker fix for IdentityServer4
+                bool isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+                if (isDevelopment)
+                {
+                    options.TokenValidationParameters.ValidIssuers = new[] { "http://127.0.0.1:5305", "http://localhost:5305", "http://host.docker.internal:5305" };
+                    options.Events.OnRedirectToIdentityProvider = async context =>
+                    {
+                        context.ProtocolMessage.IssuerAddress = context.ProtocolMessage.IssuerAddress.Replace("host.docker.internal", "localhost");
+                        await Task.CompletedTask;
+                    };
+                }
+
                 options.Events.OnTicketReceived = async context => await TranslateOidcClaims(context);
             });
 
