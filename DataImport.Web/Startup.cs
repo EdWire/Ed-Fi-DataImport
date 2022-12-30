@@ -94,11 +94,18 @@ namespace DataImport.Web
 
             if (Configuration["AppSettings:Mode"] == "InstanceYearSpecific")
             {
-
-                services.AddTransient<Areas.Instance.Modules.IInstanceDropdownValueProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceDropdownValueProvider>();
-                services.AddTransient<Areas.Instance.Modules.IInstancePostMigrationProcessingProvider, Areas.Instance.Modules.DefaultInstancePostMigrationProcessingProvider>();
-                services.AddTransient<Areas.Instance.Modules.IInstanceValidationProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceValidationProvider>();
-
+                if (string.IsNullOrEmpty(Configuration["EdGraph:Enabled"]))
+                {
+                    services.AddTransient<Areas.Instance.Modules.IInstanceDropdownValueProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceDropdownValueProvider>();
+                    services.AddTransient<Areas.Instance.Modules.IInstancePostMigrationProcessingProvider, Areas.Instance.Modules.DefaultInstancePostMigrationProcessingProvider>();
+                    services.AddTransient<Areas.Instance.Modules.IInstanceValidationProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceValidationProvider>();
+                }
+                else
+                {
+                    services.AddTransient<Areas.Instance.Modules.IInstanceDropdownValueProvider, Areas.EdGraph.Modules.EdGraphDropdownValueProvider>();
+                    services.AddTransient<Areas.Instance.Modules.IInstancePostMigrationProcessingProvider, Areas.EdGraph.Modules.EdGraphInstancePostMigrationProcessingProvider>();
+                    services.AddTransient<Areas.Instance.Modules.IInstanceValidationProvider, Areas.EdGraph.Modules.EdGraphInstanceValidationProvider>();
+                }
                 services.AddTransient<Areas.Instance.Modules.IDatabaseConnectionStringProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceConnectionStringProvider>();
                 services.AddDbContext<DataImportDbContext, Areas.Instance.Models.InstanceSqlDataImportDbContext>();
             }
