@@ -92,21 +92,34 @@ namespace DataImport.Web
 
             services.AddHttpClient();
 
-            var databaseEngine = Configuration["AppSettings:DatabaseEngine"];
+            if (Configuration["AppSettings:Mode"] == "InstanceYearSpecific")
+            {
 
-            if (DatabaseEngineEnum.Parse(databaseEngine).Equals(DatabaseEngineEnum.PostgreSql))
-            {
-                services.AddDbContext<DataImportDbContext, PostgreSqlDataImportDbContext>((s, options) =>
-                 options.UseNpgsql(
-                         s.GetRequiredService<IOptions<ConnectionStrings>>()
-                             .Value.DefaultConnection));
+                services.AddTransient<Areas.Instance.Modules.IInstanceDropdownValueProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceDropdownValueProvider>();
+                services.AddTransient<Areas.Instance.Modules.IInstancePostMigrationProcessingProvider, Areas.Instance.Modules.DefaultInstancePostMigrationProcessingProvider>();
+                services.AddTransient<Areas.Instance.Modules.IInstanceValidationProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceValidationProvider>();
+
+                services.AddTransient<Areas.Instance.Modules.IDatabaseConnectionStringProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceConnectionStringProvider>();
+                services.AddDbContext<DataImportDbContext, Areas.Instance.Models.InstanceSqlDataImportDbContext>();
             }
-            else if (DatabaseEngineEnum.Parse(databaseEngine).Equals(DatabaseEngineEnum.SqlServer))
+            else
             {
-                services.AddDbContext<DataImportDbContext, SqlDataImportDbContext>((s, options) =>
-                  options.UseSqlServer(
-                          s.GetRequiredService<IOptions<ConnectionStrings>>()
-                              .Value.DefaultConnection));
+                var databaseEngine = Configuration["AppSettings:DatabaseEngine"];
+
+                if (DatabaseEngineEnum.Parse(databaseEngine).Equals(DatabaseEngineEnum.PostgreSql))
+                {
+                    services.AddDbContext<DataImportDbContext, PostgreSqlDataImportDbContext>((s, options) =>
+                     options.UseNpgsql(
+                             s.GetRequiredService<IOptions<ConnectionStrings>>()
+                                 .Value.DefaultConnection));
+                }
+                else if (DatabaseEngineEnum.Parse(databaseEngine).Equals(DatabaseEngineEnum.SqlServer))
+                {
+                    services.AddDbContext<DataImportDbContext, SqlDataImportDbContext>((s, options) =>
+                      options.UseSqlServer(
+                              s.GetRequiredService<IOptions<ConnectionStrings>>()
+                                  .Value.DefaultConnection));
+                }
             }
 
             services.AddTransient<IOAuthRequestWrapper, OAuthRequestWrapper>();
@@ -260,8 +273,11 @@ namespace DataImport.Web
                 return Task.CompletedTask;
             });
 
-            Log.Logger.Information("Migrating database");
-            dataImportDbContext.Database.Migrate();
+            if (Configuration["AppSettings:Mode"] != "InstanceYearSpecific")
+            {
+                Log.Logger.Information("Migrating database");
+                dataImportDbContext.Database.Migrate();
+            }
 
             app.UseHttpsRedirection();
             app.UseWebOptimizer();
@@ -270,6 +286,8 @@ namespace DataImport.Web
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            if (Configuration["AppSettings:Mode"] == "InstanceYearSpecific") app.UseMiddleware<Areas.Instance.Middleware.InstanceSqlDataImportDbContextMiddleware>();
 
             app.UseMiddleware<LoggingMiddleware>();
 

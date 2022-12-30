@@ -1,0 +1,18 @@
+@model DataImport.Web.Areas.Instance.Entities.InstancesDropdown
+@if (User.Identity is not null && User.Identity.IsAuthenticated && Model is not null)
+{
+    <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+            @Model.SelectedInstanceName
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            @foreach (string instance in Model.Instances)
+            {
+                <li>
+                    @Html.Raw(@instance)
+                </li>
+            }
+        </ul>
+    </li>
+}
