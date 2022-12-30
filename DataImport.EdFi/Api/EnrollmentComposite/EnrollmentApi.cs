@@ -11,7 +11,7 @@ using DataImport.Common.ExtensionMethods;
 using DataImport.EdFi.Models.EnrollmentComposite;
 using RestSharp;
 
-namespace DataImport.EdFi.Api.EnrollmentComposite
+namespace DataImport.EdFi.Api.EnrollmentComposite 
 {
     public class EnrollmentApi
     {
@@ -20,7 +20,7 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
         private readonly IMapper _mapper;
         protected readonly string CompositePath;
 
-        public EnrollmentApi(IRestClient client, string apiVersion, string year, IMapper mapper = null)
+        public EnrollmentApi(IRestClient client, string apiVersion, string instanceYearSpecificInstance, string year, IMapper mapper = null)
         {
             Client = client;
             _apiVersion = apiVersion;
@@ -28,13 +28,14 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
 
             if (!apiVersion.IsOdsV2())
             {
-                CompositePath = year == null ? "/composites/v1" : $"/composites/v1/{year}";
+                CompositePath = year == null ? "/composites/v1" : instanceYearSpecificInstance == null ? $"/composites/v1/{year}" : $"/composites/v1/{instanceYearSpecificInstance}/{year}";
+
                 var baseUrl = Common.Helpers.UrlUtility.RemoveAfterLastInstanceOf(Client.BaseUrl.ToString().Trim(), "/data/");
                 Client.BaseUrl = new Uri(baseUrl);
             }
         }
 
-        public List<School> GetAllSchools(int? offset = null, int? limit = null)
+        public List<School> GetAllSchools(int? offset= null, int? limit= null)
         {
             var request = _apiVersion.IsOdsV2()
                 ? new RestRequest("/enrollment/schools", Method.GET)
@@ -52,7 +53,7 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
                 : Client.Execute<List<School>>(request).Data;
         }
 
-        public List<Section> GetSectionsBySchoolId(string schoolId, int? offset = null, int? limit = null)
+        public List<Section> GetSectionsBySchoolId(string schoolId, int? offset= null, int? limit= null)
         {
             var request = _apiVersion.IsOdsV2()
                 ? new RestRequest("/enrollment/schools/{school_id}/sections", Method.GET)
@@ -60,8 +61,8 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
             request.RequestFormat = DataFormat.Json;
 
             request.AddUrlSegment("school_id", schoolId);
-            if (schoolId == null)
-                throw new ArgumentException("API method call is missing required parameters");
+            if (schoolId == null )
+               throw new ArgumentException("API method call is missing required parameters");
             if (offset != null)
                 request.AddParameter("offset", offset);
             if (limit != null)
@@ -73,7 +74,7 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
                 : Client.Execute<List<Section>>(request).Data;
         }
 
-        public List<Student> GetStudentsBySchoolId(string schoolId, int? offset = null, int? limit = null)
+        public List<Student> GetStudentsBySchoolId(string schoolId, int? offset= null, int? limit= null)
         {
             var request = _apiVersion.IsOdsV2()
                 ? new RestRequest("/enrollment/schools/{school_id}/students", Method.GET)
@@ -81,8 +82,8 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
             request.RequestFormat = DataFormat.Json;
 
             request.AddUrlSegment("school_id", schoolId);
-            if (schoolId == null)
-                throw new ArgumentException("API method call is missing required parameters");
+            if (schoolId == null )
+               throw new ArgumentException("API method call is missing required parameters");
             if (offset != null)
                 request.AddParameter("offset", offset);
             if (limit != null)
@@ -92,7 +93,7 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
             return response.Data;
         }
 
-        public List<Staff> GetStaffsBySchoolId(string schoolId, int? offset = null, int? limit = null)
+        public List<Staff> GetStaffsBySchoolId(string schoolId, int? offset= null, int? limit= null)
         {
             var request = _apiVersion.IsOdsV2()
                 ? new RestRequest("/enrollment/schools/{school_id}/staffs", Method.GET)
@@ -100,8 +101,8 @@ namespace DataImport.EdFi.Api.EnrollmentComposite
             request.RequestFormat = DataFormat.Json;
 
             request.AddUrlSegment("school_id", schoolId);
-            if (schoolId == null)
-                throw new ArgumentException("API method call is missing required parameters");
+            if (schoolId == null )
+               throw new ArgumentException("API method call is missing required parameters");
             if (offset != null)
                 request.AddParameter("offset", offset);
             if (limit != null)

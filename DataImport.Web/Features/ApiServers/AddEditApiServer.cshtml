@@ -37,7 +37,7 @@ See the LICENSE and NOTICES files in the project root for more information.
     </div>
 
     @Html.Input(m => m.Url, new { placeholder = "API Server Base URL (Example: https://[url]/api/v2.0/2019)" },
-        Html.HelpSpan("Examples: https://ods.example.com/api/v2.0/2019, https://ods.example.com/data/v3, or https://ods.example.com/data/v3/2019"),
+        Html.HelpSpan("Examples: https://ods.example.com/api/v2.0/2019, https://ods.example.com/data/v3, or https://ods.example.com/data/v3/2019, or https://ods.example.com/data/v3/{instanceid}/2019"),
         Html.OdsApiUrlHelpModalButton())
 
     @Html.Input(m => m.Key)

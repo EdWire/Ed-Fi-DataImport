@@ -20,6 +20,7 @@ namespace DataImport.Web.Services
     {
         private readonly ISwaggerMetadataFetcher _metadataFetcher;
         private readonly Dictionary<string, string> _yearSpecificYearCache = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _instanceYearSpecificInstanceCache = new Dictionary<string, string>();
         private readonly IOAuthRequestWrapper _oauthRequestWrapper;
         private string _encryptionKey;
 
@@ -68,6 +69,24 @@ namespace DataImport.Web.Services
             _yearSpecificYearCache.Add(cacheKey, yearSpecificYear);
 
             return yearSpecificYear;
+        }
+        protected override async Task<string> GetInstanceYearSpecificInstance(ApiServer apiServer, ApiVersion apiVersion)
+        {
+            if (apiVersion.Version.IsOdsV2())
+            {
+                return null;
+            }
+
+            string cacheKey = $"{apiVersion}_{apiServer.Url}";
+            if (_instanceYearSpecificInstanceCache.ContainsKey(cacheKey))
+            {
+                return _instanceYearSpecificInstanceCache[cacheKey];
+            }
+
+            string instanceYearSpecificInstance = await _metadataFetcher.GetInstanceYearSpecificInstance(apiServer.Url);
+            _instanceYearSpecificInstanceCache.Add(cacheKey, instanceYearSpecificInstance);
+
+            return instanceYearSpecificInstance;
         }
     }
 }

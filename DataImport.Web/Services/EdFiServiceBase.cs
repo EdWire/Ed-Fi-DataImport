@@ -1,8 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-// Licensed to the Ed-Fi Alliance under one or more agreements.
-// The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
-// See the LICENSE and NOTICES files in the project root for more information.
-
 using AutoMapper;
 using DataImport.EdFi;
 using DataImport.EdFi.Api;
@@ -37,34 +32,34 @@ namespace DataImport.Web.Services
 
         public Task<List<Staff>> GetStaffBySchoolId(ApiServer apiServer, string schoolId, int offset, int limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
-                var api = new EnrollmentApi(client, apiVersion.Version, yearSpecificYear);
+                var api = new EnrollmentApi(client, apiVersion.Version, instanceYearSpecificInstance, yearSpecificYear);
                 return api.GetStaffsBySchoolId(schoolId, offset, limit);
             }, apiServer);
         }
 
         public Task<List<Student>> GetStudentsBySchoolId(ApiServer apiServer, string schoolId, int offset, int limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
-                var api = new EnrollmentApi(client, apiVersion.Version, yearSpecificYear);
+                var api = new EnrollmentApi(client, apiVersion.Version, instanceYearSpecificInstance, yearSpecificYear);
                 return api.GetStudentsBySchoolId(schoolId, offset, limit);
             }, apiServer);
         }
 
         public Task<List<Section>> GetSectionsBySchoolId(ApiServer apiServer, string schoolId, int offset, int limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
-                var api = new EnrollmentApi(client, apiVersion.Version, yearSpecificYear, Mapper);
+                var api = new EnrollmentApi(client, apiVersion.Version, instanceYearSpecificInstance, yearSpecificYear, Mapper);
                 return api.GetSectionsBySchoolId(schoolId, offset, limit);
             }, apiServer);
         }
 
         public Task<Assessment> GetAssessmentById(ApiServer apiServer, string id)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
                 var api = new AssessmentsApi(client, apiVersion.Version, Mapper);
                 return api.GetAssessmentById(id);
@@ -74,7 +69,7 @@ namespace DataImport.Web.Services
         public Task<List<ObjectiveAssessment>> GetObjectiveAssessmentsByAssessment(ApiServer apiServer, Assessment assessment, int offset,
             int limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
                 var api = new ObjectiveAssessmentsApi(client, apiVersion.Version);
                 return api.GetObjectiveAssessmentsByAssessmentKey(offset, limit, assessment.AssessmentIdentifier,
@@ -84,16 +79,16 @@ namespace DataImport.Web.Services
 
         public Task<List<School>> GetSchools(ApiServer apiServer, int? offset, int? limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
-                var api = new EnrollmentApi(client, apiVersion.Version, yearSpecificYear, Mapper);
+                var api = new EnrollmentApi(client, apiVersion.Version, instanceYearSpecificInstance, yearSpecificYear, Mapper);
                 return api.GetAllSchools(offset, limit);
             }, apiServer);
         }
 
         public Task<LocalEducationAgency> GetLocalEducationAgencyById(ApiServer apiServer, string id)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
                 var api = new LocalEducationAgenciesApi(client, apiVersion.Version);
                 return api.GetLocalEducationAgenciesById(id);
@@ -102,7 +97,7 @@ namespace DataImport.Web.Services
 
         public Task<List<Assessment>> GetResourceAssessments(ApiServer apiServer, int? offset, int? limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
                 var api = new AssessmentsApi(client, apiVersion.Version, Mapper);
                 return api.GetAllAssessments(offset, limit);
@@ -111,7 +106,7 @@ namespace DataImport.Web.Services
 
         public Task<EdFi.Models.Resources.School> GetSchool(ApiServer apiServer, string id)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
                 var api = new SchoolsApi(client, apiVersion.Version);
                 return api.GetSchoolById(id);
@@ -120,21 +115,22 @@ namespace DataImport.Web.Services
 
         public Task<List<Descriptor>> GetDescriptors(ApiServer apiServer, string descriptorPath, int? offset, int? limit)
         {
-            return Query((client, apiVersion, yearSpecificYear) =>
+            return Query((client, apiVersion, instanceYearSpecificInstance, yearSpecificYear) =>
             {
                 var api = new DescriptorsApi(client);
                 return api.GetAllDescriptors(descriptorPath, offset, limit);
             }, apiServer);
         }
 
-        protected async Task<TResponseData> Query<TResponseData>(Func<IRestClient, ApiVersion, string, TResponseData> getData, ApiServer apiServer)
+        protected async Task<TResponseData> Query<TResponseData>(Func<IRestClient, ApiVersion, string, string, TResponseData> getData, ApiServer apiServer)
         {
             try
             {
                 var apiVersion = apiServer.ApiVersion ?? DatabaseContext.ApiVersions.Single(x => x.Id == apiServer.ApiVersionId);
 
                 string yearSpecificYear = await GetYearSpecificYear(apiServer, apiVersion);
-                return getData(EstablishApiClient(apiServer), apiVersion, yearSpecificYear);
+                string instanceYearSpecificInstance = await GetInstanceYearSpecificInstance(apiServer, apiVersion);
+                return getData(EstablishApiClient(apiServer), apiVersion, instanceYearSpecificInstance, yearSpecificYear);
             }
             catch (DescriptorNotFoundException)
             {
@@ -149,5 +145,6 @@ namespace DataImport.Web.Services
         protected abstract IRestClient EstablishApiClient(ApiServer apiServer);
 
         protected abstract Task<string> GetYearSpecificYear(ApiServer apiServer, ApiVersion apiVersion);
+        protected abstract Task<string> GetInstanceYearSpecificInstance(ApiServer apiServer, ApiVersion apiVersion);
     }
 }

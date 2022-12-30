@@ -58,8 +58,12 @@ namespace DataImport.Web.Services.Swagger
                 var rawApis = await _swaggerWebClient.DownloadString(baseUrl);
                 var response = JToken.Parse(rawApis);
                 var isYearSpecific = response["apiMode"].ToString() == "Year Specific";
+                var isInstanceYearSpecific = response["apiMode"].ToString() == "Instance Year Specific";
 
-                return isYearSpecific ? new Uri(apiUrl).Segments.Last().Trim('/') : null;
+                string year;
+                year = isYearSpecific ? new Uri(apiUrl).Segments.Last().Trim('/') : null;
+                year = isInstanceYearSpecific ? new Uri(apiUrl).Segments.Last().Trim('/') : null;
+                return year;
             }
             catch (Exception exception)
             {
@@ -186,7 +190,7 @@ namespace DataImport.Web.Services.Swagger
 
             string path;
 
-            if (year is not null)
+            if (year is not null && instanceYearSpecificInstance is null)
             {
                 path = $"data/v3/{year}";
             }

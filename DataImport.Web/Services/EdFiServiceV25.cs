@@ -43,5 +43,9 @@ namespace DataImport.Web.Services
         {
             return null;
         }
+        protected override Task<string> GetInstanceYearSpecificInstance(ApiServer apiServer, ApiVersion apiVersion)
+        {
+            return null;
+        }
     }
 }
