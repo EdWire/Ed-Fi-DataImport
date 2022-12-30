@@ -67,6 +67,8 @@ namespace DataImport.Web.Areas.Identity
         private void ConfigureForOpenIdConnectIdentity(IServiceCollection services, IdentitySettings identitySettings)
         {
             var openIdSettings = identitySettings.OpenIdSettings;
+            var dataImportRoleClaimValue = openIdSettings.RoleClaimValue != "" ? openIdSettings.RoleClaimValue : IdentitySettingsConstants.RoleClaimValue;
+
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -115,7 +117,7 @@ namespace DataImport.Web.Areas.Identity
             services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                    .RequireClaim(ClaimTypes.Role, IdentitySettingsConstants.RoleClaimValue)
+                    .RequireClaim(ClaimTypes.Role, dataImportRoleClaimValue)
                     .Build();
             });
 
@@ -142,10 +144,10 @@ namespace DataImport.Web.Areas.Identity
                     ReplaceClaimIfNotNull(openIdSettings.ClaimTypeMappings.EmailClaimType, ClaimTypes.Email);
 
                     var roleClaims = claimsIdentity.Claims.Where(m => m.Type == openIdSettings.ClaimTypeMappings.RoleClaimType).ToList();
-                    if (roleClaims.Any(r => r.Value == IdentitySettingsConstants.RoleClaimValue))
+                    if(roleClaims.Any(r => r.Value == dataImportRoleClaimValue))
                     {
                         foreach (var otherClaim in roleClaims) { claimsIdentity.RemoveClaim(otherClaim); }
-                        claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, IdentitySettingsConstants.RoleClaimValue));
+                        claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, dataImportRoleClaimValue));
                     }
                 }
 

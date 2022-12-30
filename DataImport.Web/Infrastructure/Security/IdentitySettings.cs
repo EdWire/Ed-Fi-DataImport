@@ -35,6 +35,7 @@ public class OpenIdSettings
     /// Mappings from OIDC Claim Types to those used by Admin App. Should only be used "OnTicketReceived" - favor ClaimTypes used by Admin App, not OIDC.
     /// </summary>
     public ClaimTypeMappings ClaimTypeMappings { get; set; }
+    public string RoleClaimValue { get; set; }
 }
 
 public class ClaimTypeMappings

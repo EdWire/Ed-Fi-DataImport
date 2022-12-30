@@ -31,6 +31,10 @@ using NUglify.JavaScript;
 using Serilog;
 using DataImport.Common.Enums;
 using DataImport.Web.Infrastructure.Security;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace DataImport.Web
 {
@@ -64,6 +68,14 @@ namespace DataImport.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.All;
+                options.ForwardLimit = 2;      // NOTE: Limit number of proxy hops trusted
+                options.KnownNetworks.Clear(); // NOTE: Limit Networks trusted if needed
+                options.KnownProxies.Clear();  // NOTE: Limit Proxies trusted if needed
+            });
+
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.Configure<IdentitySettings>(Configuration.GetSection("IdentitySettings"));
             services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
@@ -199,14 +211,31 @@ namespace DataImport.Web
             });
 
             services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
+
+            services.AddHealthChecks()
+                .AddCheck("self", () => HealthCheckResult.Healthy());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataImportDbContext dataImportDbContext)
         {
+            Log.Logger.Information($"AspNet Environment: {env.EnvironmentName}");
+
+            app.UseForwardedHeaders();
+
+            var pathBase = Configuration["PathBase"];
+
+            if (!string.IsNullOrEmpty(pathBase))
+            {
+                Log.Logger.Debug("Using PATH BASE '{pathBase}'", pathBase);
+                app.UsePathBase(pathBase);
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                // dev no-cert\http-only fix for IdentityServer4
+                app.UseCookiePolicy(new CookiePolicyOptions() { HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always, MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None, Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always });
             }
             else
             {
@@ -248,6 +277,15 @@ namespace DataImport.Web
             {
                 endpoints.MapDefaultControllerRoute().RequireAuthorization();
                 endpoints.MapRazorPages();
+                endpoints.MapHealthChecks("/hc", new HealthCheckOptions()
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+                endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
+                {
+                    Predicate = r => r.Name.Contains("self")
+                });
             });
         }
     }
