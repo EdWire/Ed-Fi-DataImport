@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -17,6 +18,9 @@ namespace DataImport.Web.Areas.EdGraph.Modules;
 
 public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
 {
+    private const string ExpiresAtTokenName = "expires_at";
+    private const int TokenTimeSpanInSeconds = 60;
+
     private readonly ILogger<EdGraphInstanceValidationProvider> _logger;
     private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptions;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -44,14 +48,23 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
 
     public async Task<bool> ValidateAsync(HttpContext httpContext)
     {
+        // Note: Needed for replacement of expired access token
+        await RefreshAccessToken(httpContext);
+
         var jwtInstanceId = await httpContext.GetJwtClaimBasedInstanceIdAsync(_jwtInstanceIdKey);
         var userProfile = await httpContext.GetEdGraphUserProfileAsync(_userProfileUri);
 
         var usrPrfInstanceId = userProfile.Preferences.SingleOrDefault(x => x.Code == _userProfileInstanceIdKey);
         if (usrPrfInstanceId is null) throw new Exception($"User profile InstanceId not found");
 
-
         if (jwtInstanceId != usrPrfInstanceId.Value)
+        {
+            await ManualAccessTokenRefresh(httpContext);
+        }
+
+        return true;
+
+        async Task ManualAccessTokenRefresh(HttpContext httpContext)
         {
             try
             {
@@ -60,6 +73,7 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
                 var refreshTokenRequest = new RefreshTokenRequest { Address = configuration.TokenEndpoint, ClientId = oidcOptions.ClientId, ClientSecret = oidcOptions.ClientSecret };
                 await httpContext.UpdateEdGraphTokensAsync(_logger, _httpClientFactory, refreshTokenRequest);
                 httpContext.Response.Redirect(_instanceSwitchRedirectUri);  //PATCH: to make the app reload after correction
+                //_logger.LogInformation($"Manual user access token refresh succeeded.");
             }
             catch (Exception e)
             {
@@ -67,6 +81,19 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
             }
         }
 
-        return true;
+        async Task RefreshAccessToken(HttpContext httpContext)
+        {
+            var expiresAt = await httpContext.GetTokenAsync(ExpiresAtTokenName);
+            if (string.IsNullOrEmpty(expiresAt))
+                throw new Exception($"Please verify that the login provider has been correctly configured. {ExpiresAtTokenName} was not provided via {nameof(HttpContext)}.");
+            var dtExpires = DateTimeOffset.Parse(expiresAt, CultureInfo.InvariantCulture);
+            var dtRefresh = dtExpires.Subtract(TimeSpan.FromSeconds(TokenTimeSpanInSeconds));
+            var _clock = (ISystemClock) httpContext.RequestServices.GetService(typeof(ISystemClock));
+
+            if (dtRefresh < _clock.UtcNow)
+            {
+                await ManualAccessTokenRefresh(httpContext);
+            }
+        }
     }
 }
