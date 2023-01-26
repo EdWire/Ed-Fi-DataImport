@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <AzureFunctionsVersion>V4</AzureFunctionsVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+        <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>
+        <DockerFastModeProjectMountDirectory>/home/site/wwwroot</DockerFastModeProjectMountDirectory>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+
+        <_FunctionsSkipCleanOutput>true</_FunctionsSkipCleanOutput>
+        <DurableFunctionsMonitorRoutePrefix>dataimport-azurefunctions-manager</DurableFunctionsMonitorRoutePrefix>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Azure.Storage.Queues" Version="12.12.0" />
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+
+        <PackageReference Include="Microsoft.Azure.DurableTask.Core" Version="2.12.1" />
+        <PackageReference Include="Microsoft.Azure.DurableTask.AzureStorage" Version="1.13.3" />
+
+        <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" />
+        
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" Version="1.1.0" />        
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage" Version="5.0.1" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.1.0" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.DurableTask" Version="1.0.0" />
+
+        <!-- Needed for logging fix-->
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.0.0-preview3" />
+        <!--<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" Version="1.5.1" />-->
+
+        <!--<PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="4.0.1" />-->
+
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.2" />
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+        <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
+        <PackageReference Include="RestSharp" Version="108.0.3" />
+
+        <PackageReference Include="Serilog" Version="2.12.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+        <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+
+        <PackageReference Include="DurableFunctionsMonitor.DotNetBackend" Version="6.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Update="host.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="local.settings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="TransformLoadTool\DataImport.TransformLoad.zip">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+  <ItemGroup>
+    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
+  </ItemGroup>
+</Project>

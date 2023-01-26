@@ -1,0 +1,48 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    //Azure Function Runtime
+    "DOTNET_ENVIRONMENT": "Development",
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    // NOTE:  Only Used for dev and prod
+    //"WEBSITE_HOSTNAME": "localhost:7071",
+    "FUNCTIONS_ENABLE_DRAIN_ON_APP_STOPPING": "true", //GraceFull Shutdown from K8 Jobs
+
+    // Disable a function on runtime using ENV AzureWebJobs.<FUNCTION_NAME>.Disabled
+    //"AzureWebJobs.FUNCTION_NANE.Disabled": "true",
+
+    // Strorage account for Azure function runtime
+    //"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net",
+    // NOTE:  Only Used for dev and prod
+    //"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net",
+    // NOTE: local
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    //Durable Tasks Hub Name Per AzureFunctions Project
+    "TaskHubName": "dataimport-azurefunctions-taskhub",
+
+    // || AzureFunctionAppManager ENV ||
+    "AzureFunctionAppManager__Enabled": "",
+    "AzureFunctionAppManager__AzureFunctionAppMasterKey": "MASTER_KEY",
+
+    "AzureFunctionAppManager__AzureFunctionAppTimerTicksCycleInSeconds": 60,
+    "AzureFunctionAppManager__AzureFunctionAppIdleTicksCyclesMax": 2,
+
+    //Azure Functions Params
+    //Two underscore (__) not allowed
+
+    "EdGraphTransformLoadTimerTrigger": "0 */5 * * * *", //Run every 5 minutes
+
+    // || Data Import Tool ENV ||
+    // NOTE:  Only Used for dev and prod
+    //"ConnectionStrings__storageConnection": "DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net",
+    // NOTE: local
+    "ConnectionStrings__storageConnection": "UseDevelopmentStorage=true",
+
+    // NOTE: local
+    "ConnectionStrings__defaultConnection": "server=(local);database=EdFi_{0};User Id=sa;Password=Lp&Oly3Jq!9Z0rG@;Application Name=EdFi.Ods.WebApi;Integrated Security=false;TrustServerCertificate=True",
+    "AppSettings__DatabaseEngine": "SqlServer",
+    "EdGraph__storageConnection__QueueName": "dataimport-transformload-queue",
+    "EdGraph__AzureSQL__ElasticPoolName": "eg-mssql-elastic-01-dev-scus"
+  }
+}

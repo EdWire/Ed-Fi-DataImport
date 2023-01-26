@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "storage": {
+      "type": "storage",
+      "connectionId": "AzureWebJobsStorage"
+    }
+  }
+}

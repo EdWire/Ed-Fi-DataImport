@@ -46,6 +46,25 @@ services:
     networks:
       - edgraph
 
+  dataimport.azurefunctions:
+    image: ${DOCKER_REGISTRY-}dataimportazurefunctions
+    build:
+      context: .
+      dockerfile: DataImport.AzureFunctions/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Development
+      - FUNCTIONS_WORKER_RUNTIME=dotnet-isolated
+      - AzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      - ConnectionStrings__storageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      - ConnectionStrings__defaultConnection=server=host.docker.internal;database=EdFi_{0};User Id=sa;Password=Lp&Oly3Jq!9Z0rG@;Application Name=EdFi.Ods.WebApi;Integrated Security=false;TrustServerCertificate=True;
+      - AppSettings__DatabaseEngine=SqlServer
+      - EdGraph__storageConnection__QueueName=dataimport-transformload-queue
+      - EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-dev-scus
+      - ConnectionStringsStorageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      - EdGraphStorageConnectionQueueName=dataimport-transformload-queue
+      - EdGraphTransformLoadTimerTrigger=0 */5 * * * *
+      
 networks:
   edgraph:
     name: edgraph-network

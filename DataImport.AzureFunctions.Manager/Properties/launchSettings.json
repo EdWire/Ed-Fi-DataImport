@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "DataImport.AzureFunctions": {
+      "commandName": "Project",
+      "commandLineArgs": "--csharp",
+        "environmentVariables": {
+  
+        }
+    }
+  }
+}

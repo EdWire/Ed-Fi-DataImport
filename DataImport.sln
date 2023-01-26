@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.Common", "DataImport.Common\DataImport.Common.csproj", "{17FC1AF4-3EFE-4851-82AF-7C5D48EEF17B}"
 EndProject
@@ -13,10 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.Server.Transform
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AF8B985D-9D72-49BD-8EA5-AA904524282C}"
 	ProjectSection(SolutionItems) = preProject
+		azure-pipelines-azure-functions.yml = azure-pipelines-azure-functions.yml
+		azure-pipelines.yml = azure-pipelines.yml
 		global.json = global.json
 		LICENSE.md = LICENSE.md
-		README.md = README.md
 		logging.json = logging.json
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.Server.TransformLoad.Tests", "DataImport.Server.TransformLoad.Tests\DataImport.Server.TransformLoad.Tests.csproj", "{B652FFF3-74F1-492D-8371-F87C45B1C6DB}"
@@ -32,6 +34,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.Web", "DataImport.Web\DataImport.Web.csproj", "{9DA5708A-854A-4A58-823D-AD3DFA38D3B2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.Web.Tests", "DataImport.Web.Tests\DataImport.Web.Tests.csproj", "{3A2E27B2-BF5A-4056-A7E1-C3B547D69D5B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.AzureFunctions", "DataImport.AzureFunctions\DataImport.AzureFunctions.csproj", "{C743948E-E12B-47E4-8956-E36FC2277B9F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.AzureFunctions.Manager", "DataImport.AzureFunctions.Manager\DataImport.AzureFunctions.Manager.csproj", "{407382B5-0A7B-4B6D-AE3F-AF00D0B3A692}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "az docs", "az docs", "{D9FDC7E1-39D3-449F-B265-7A0DB5FD9343}"
+	ProjectSection(SolutionItems) = preProject
+		az docs\azurefunctions.readme.md = az docs\azurefunctions.readme.md
+		az docs\host.json = az docs\host.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +95,14 @@ Global
 		{3A2E27B2-BF5A-4056-A7E1-C3B547D69D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A2E27B2-BF5A-4056-A7E1-C3B547D69D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A2E27B2-BF5A-4056-A7E1-C3B547D69D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C743948E-E12B-47E4-8956-E36FC2277B9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C743948E-E12B-47E4-8956-E36FC2277B9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C743948E-E12B-47E4-8956-E36FC2277B9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C743948E-E12B-47E4-8956-E36FC2277B9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{407382B5-0A7B-4B6D-AE3F-AF00D0B3A692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{407382B5-0A7B-4B6D-AE3F-AF00D0B3A692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{407382B5-0A7B-4B6D-AE3F-AF00D0B3A692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{407382B5-0A7B-4B6D-AE3F-AF00D0B3A692}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
