@@ -15,7 +15,7 @@ public static class DbExtensions
                             FROM sys.databases d   
                             JOIN sys.database_service_objectives slo    
                             ON d.database_id = slo.database_id
-                            where service_objective = 'ElasticPool'
+                            where service_objective = '{elasticPoolName}'
                             and name = '{instanceDatabaseName}';";
 
         var elasticPoolCheck = Instance.Models.DbExtensions.ExecuteCommandOnMaster(command, true, masterConnectionString);

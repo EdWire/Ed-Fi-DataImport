@@ -54,9 +54,9 @@ namespace DataImport.Server.TransformLoad
 
             var cancellationTokenSource = new CancellationTokenSource();
 
-            Log.Information("Migrating database");
-            var context = builtHost.Services.GetRequiredService<DataImportDbContext>();
-            await context.Database.MigrateAsync(cancellationToken: cancellationTokenSource.Token);
+            //Log.Information("Migrating database");
+            //var context = builtHost.Services.GetRequiredService<DataImportDbContext>();
+            //await context.Database.MigrateAsync(cancellationToken: cancellationTokenSource.Token);
 
             var assembly = Assembly.GetExecutingAssembly();
             var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()

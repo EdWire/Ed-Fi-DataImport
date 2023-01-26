@@ -56,22 +56,30 @@ namespace DataImport.Server.TransformLoad
                 services.AddDbContext<DataImportDbContext, PostgreSqlDataImportDbContext>((s, options) =>
                  options.UseNpgsql(
                          s.GetRequiredService<IOptions<ConnectionStrings>>()
-                             .Value.DefaultConnection));
+                             .Value.DefaultConnection)
+                 ,
+                contextLifetime: ServiceLifetime.Transient,
+                optionsLifetime: ServiceLifetime.Transient
+                 );
             }
             else if (DatabaseEngineEnum.Parse(databaseEngine).Equals(DatabaseEngineEnum.SqlServer))
             {
                 services.AddDbContext<DataImportDbContext, SqlDataImportDbContext>((s, options) =>
                   options.UseSqlServer(
                           s.GetRequiredService<IOptions<ConnectionStrings>>()
-                              .Value.DefaultConnection));
+                              .Value.DefaultConnection)
+                   ,
+                contextLifetime: ServiceLifetime.Transient,
+                optionsLifetime: ServiceLifetime.Transient
+                );
             }
 
             services.AddHttpContextAccessor();
 
             services.AddSingleton<FileProcessor>();
-            services.AddScoped<IHostedService, Application>();
+            services.AddTransient<IHostedService, Application>();
 
-            services.AddScoped<IFileHelper, FileHelper>();
+            services.AddTransient<IFileHelper, FileHelper>();
             services.AddTransient<FtpsServer>();
             services.AddTransient<SftpServer>();
             services.AddTransient<ResolveFileServer>(serviceProvider => key =>
