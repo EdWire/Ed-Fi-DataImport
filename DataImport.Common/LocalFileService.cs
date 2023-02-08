@@ -12,6 +12,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using File = DataImport.Models.File;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System.Configuration;
 
 namespace DataImport.Common
 {
@@ -21,16 +24,34 @@ namespace DataImport.Common
         private readonly IFileSettings _fileSettings;
         private readonly IFileHelper _fileHelper;
 
-        public LocalFileService(ILogger<LocalFileService> logger, IFileSettings fileSettings, IFileHelper fileHelper)
+        private readonly IConfiguration _configuration;
+        private readonly HttpContext _httpContext;
+        private readonly string _jwtInstanceIdKey;
+        public LocalFileService(ILogger<LocalFileService> logger, IFileSettings fileSettings, IFileHelper fileHelper, IConfiguration configuration, IHttpContextAccessor httpContentAccessor = null)
         {
             _logger = logger;
             _fileSettings = fileSettings;
             _fileHelper = fileHelper;
+
+            _configuration = configuration;
+            _httpContext = httpContentAccessor?.HttpContext;
+            _jwtInstanceIdKey = configuration["Instance:JwtInstanceIdKey"];
         }
 
         public async Task Upload(string fileName, Stream fileStream, Agent agent)
         {
-            var uploadPath = Path.Combine(_fileSettings.ShareName, agent.GetDirectory());
+            //NOTE: Patch for tenant in azure file service
+            string rootDataImportDirectory = "DataImport";
+            if (_configuration["AppSettings:Mode"] == "InstanceYearSpecific")
+            {
+                if (_httpContext == default) throw new DataImport.Models.ConfigurationErrorsException($"{nameof(AzureFileService)} was not configured and an http context was not provided via {nameof(IHttpContextAccessor)}.");
+                var instanceId = _httpContext.GetJwtClaimBasedInstanceIdAsync(_jwtInstanceIdKey).Result;
+                if (string.IsNullOrEmpty(instanceId)) throw new InvalidOperationException("The instance-year-specific DataImport database name replacement token cannot be derived because the instance id was not set in the current context.");
+
+                rootDataImportDirectory = $"DataImport_{instanceId}";
+            }
+
+            var uploadPath = Path.Combine(_fileSettings.ShareName, agent.GetDirectory(rootDataImportDirectory));
 
             if (!Directory.Exists(uploadPath))
                 Directory.CreateDirectory(uploadPath);
@@ -56,7 +77,18 @@ namespace DataImport.Common
 
             try
             {
-                var localPath = Path.Combine(_fileSettings.ShareName, agent.GetDirectory());
+                //NOTE: Patch for tenant in azure file service
+                string rootDataImportDirectory = "DataImport";
+                if (_configuration["AppSettings:Mode"] == "InstanceYearSpecific")
+                {
+                    if (_httpContext == default) throw new DataImport.Models.ConfigurationErrorsException($"{nameof(AzureFileService)} was not configured and an http context was not provided via {nameof(IHttpContextAccessor)}.");
+                    var instanceId = _httpContext.GetJwtClaimBasedInstanceIdAsync(_jwtInstanceIdKey).Result;
+                    if (string.IsNullOrEmpty(instanceId)) throw new InvalidOperationException("The instance-year-specific DataImport database name replacement token cannot be derived because the instance id was not set in the current context.");
+
+                    rootDataImportDirectory = $"DataImport_{instanceId}";
+                }
+
+                var localPath = Path.Combine(_fileSettings.ShareName, agent.GetDirectory(rootDataImportDirectory));
                 var localFilePath = Path.Combine(localPath, $"{Guid.NewGuid()}-{shortFileName}");
                 var localFileUri = new Uri(localFilePath);
 

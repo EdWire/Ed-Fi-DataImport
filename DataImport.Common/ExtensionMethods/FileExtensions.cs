@@ -67,6 +67,6 @@ namespace DataImport.Common.ExtensionMethods
         public static bool IsCsvFile(this string fileName) =>
             string.Equals(Path.GetExtension(fileName), ".csv", StringComparison.OrdinalIgnoreCase);
 
-        public static string GetDirectory(this Agent agent) => Path.Combine("DataImport", $"Agent-{agent.Id}");
+        public static string GetDirectory(this Agent agent, string dataImportDirectory) => Path.Combine(dataImportDirectory, $"Agent-{agent.Id}");
     }
 }

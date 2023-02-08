@@ -36,7 +36,9 @@ namespace DataImport.AzureFunctions.Extensions
 
             processStartInfo.EnvironmentVariables["DOTNET_ENVIRONMENT"] =  Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
             processStartInfo.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
             processStartInfo.EnvironmentVariables["AppSettings__DatabaseEngine"] = Environment.GetEnvironmentVariable("AppSettings__DatabaseEngine");
+            processStartInfo.EnvironmentVariables["AppSettings__Mode"] = Environment.GetEnvironmentVariable("AppSettings__Mode");
 
             processStartInfo.EnvironmentVariables["AppSettings__FileMode"] = Environment.GetEnvironmentVariable("AppSettings__FileMode");
             processStartInfo.EnvironmentVariables["AppSettings__ShareName"] = Environment.GetEnvironmentVariable("AppSettings__ShareName");
