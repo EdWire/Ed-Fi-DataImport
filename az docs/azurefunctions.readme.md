@@ -17,3 +17,9 @@ K8 Secrets
 
 #Azure Functions Caution:
 Task hub name should contain only alphanumeric characters, start with a letter, and have length between 3 and 45.
+
+#DevOps 
+- Need Stroage Account Secrets
+- Need AzureFunctions, AzureFunctionsManager Secrets
+- Need AzureFunctionsManager Secrets
+- Need AKS NodePool with label from Azure Portal
