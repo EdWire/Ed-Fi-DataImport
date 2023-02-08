@@ -14,6 +14,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using LogLevels = DataImport.Common.Enums.LogLevel;
 
 namespace DataImport.Server.TransformLoad.Features.LoadResources
 {
@@ -121,7 +122,7 @@ namespace DataImport.Server.TransformLoad.Features.LoadResources
                             }
                             catch
                             {
-                                LogIngestion(IngestionResult.Error, "ERROR", singlePayload, endpointUrl,
+                                LogIngestion(IngestionResult.Error, LogLevels.Error, singlePayload, endpointUrl,
                                     response?.StatusCode, response?.Content, dataToInsert);
                                 throw;
                             }
@@ -141,12 +142,12 @@ namespace DataImport.Server.TransformLoad.Features.LoadResources
                         }
                         catch
                         {
-                            LogIngestion(IngestionResult.Error, "ERROR", singlePayload, endpointUrl,
+                            LogIngestion(IngestionResult.Error, LogLevels.Error, singlePayload, endpointUrl,
                                 response?.StatusCode, response?.Content);
                             throw;
                         }
 
-                        LogIngestion(IngestionResult.Success, "INFORMATION", singlePayload, endpointUrl);
+                        LogIngestion(IngestionResult.Success, LogLevels.Information, singlePayload, endpointUrl);
 
                         // After updating the payload, stamp it so it doesn't run again in next cycle (unless it has been updated).
                         var bootstrapDataApiServer =
