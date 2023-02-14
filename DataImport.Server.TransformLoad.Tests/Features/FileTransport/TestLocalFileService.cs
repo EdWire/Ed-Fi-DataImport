@@ -7,6 +7,8 @@ using DataImport.Common;
 using DataImport.Common.ExtensionMethods;
 using DataImport.Common.Helpers;
 using DataImport.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -20,8 +22,8 @@ namespace DataImport.Server.TransformLoad.Tests.Features.FileTransport
         private readonly IFileHelper _fileHelper;
         private readonly AppSettings _appSettings;
 
-        public TestLocalFileService(ILogger<TestLocalFileService> logger, IOptions<AppSettings> options, IFileHelper fileHelper)
-            : base(logger, options.Value, fileHelper)
+        public TestLocalFileService(ILogger<TestLocalFileService> logger, IOptions<AppSettings> options, IFileHelper fileHelper, IConfiguration configuration, IHttpContextAccessor httpContentAccessor = null)
+            : base(logger, options.Value, fileHelper, configuration, httpContentAccessor)
         {
             _fileHelper = fileHelper;
             _appSettings = options.Value;
@@ -31,7 +33,7 @@ namespace DataImport.Server.TransformLoad.Tests.Features.FileTransport
         {
             var shortFileName = file.Substring(file.LastIndexOf('/') + 1);
             var fileMode = _appSettings.FileMode;
-            var localFilePath = Path.Combine(_appSettings.ShareName, fileMode, agent.GetDirectory(), shortFileName);
+            var localFilePath = Path.Combine(_appSettings.ShareName, fileMode, agent.GetDirectory("DataImport"), shortFileName);
             var localFileUri = new Uri(localFilePath);
             stream.Seek(0, SeekOrigin.Begin);
             var recordCount = stream.TotalLines(true);
