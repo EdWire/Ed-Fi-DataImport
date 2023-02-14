@@ -117,6 +117,7 @@ public class AzureFunctionAppManager : BackgroundService
                 )
             {
                 AzureFunctionAppIsIdle = false;
+                AzureFuncionAppIdleTicksCyclesCount = 0;
                 _logger.LogInformation($"Conditions not met, {nameof(AzureFunctionAppIsIdle)} set to :{AzureFunctionAppIsIdle}");
                 continue;
             }
