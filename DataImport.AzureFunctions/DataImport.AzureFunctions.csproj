@@ -20,7 +20,7 @@
         <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
 
         <PackageReference Include="Microsoft.Azure.DurableTask.Core" Version="2.12.1" />
-        <PackageReference Include="Microsoft.Azure.DurableTask.AzureStorage" Version="1.13.3" />
+        <PackageReference Include="Microsoft.Azure.DurableTask.AzureStorage" Version="1.13.4" />
 
         <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" />
@@ -38,7 +38,7 @@
 
         <!--<PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="4.0.1" />-->
 
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
 
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.2" />
         <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
@@ -49,6 +49,11 @@
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
         <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+
+        <!-- security vulnerabilities correct version of nuget dependencies-->
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
+        <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">
