@@ -5,6 +5,7 @@ The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2
 See the LICENSE and NOTICES files in the project root for more information.
 *@
 
+@using DataImport.Web.Areas.Instance;
 @using DataImport.Web.Infrastructure.Security
 @using Microsoft.Extensions.Options
 
@@ -26,7 +27,7 @@ See the LICENSE and NOTICES files in the project root for more information.
             @await Component.InvokeAsync("Instance")
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                    @User.Identity.Name
+                    @User.Identity.GetName()
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">

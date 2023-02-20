@@ -1,7 +1,10 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
@@ -28,5 +31,14 @@ public static class Extensions
             throw new Exception($"InstanceId was not provided via {nameof(IHttpContextAccessor)}.");
 
         return instanceId;
+    }
+
+    public static string GetName(this IIdentity identity)
+    {
+        ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
+        Claim claimName = claimsIdentity?.FindFirst(ClaimTypes.Name);
+        Claim JwtClaimName = claimsIdentity?.FindFirst(JwtClaimTypes.Name);
+
+        return claimName?.Value ?? JwtClaimName?.Value ?? string.Empty;
     }
 }
