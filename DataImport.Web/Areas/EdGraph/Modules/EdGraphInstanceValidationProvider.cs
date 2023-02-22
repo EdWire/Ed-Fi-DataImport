@@ -60,11 +60,11 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
         var isUserSessionValid = await httpContext.GetEdGraphUserIdSrvCheckSessionAsync(_logger, _userIdSrvCheckSessionUri);
         _logger.LogInformation($"After Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
 
-        if (!isUserSessionValid)
-        {
-            await httpContext.ManualLogOut(_logger);
-            return false;
-        }
+        //if (!isUserSessionValid)
+        //{
+        //    await httpContext.ManualLogOut(_logger);
+        //    return false;
+        //}
 
         var jwtInstanceId = await httpContext.GetJwtClaimBasedInstanceIdAsync(_jwtInstanceIdKey);
         var userProfile = await httpContext.GetEdGraphUserProfileAsync(_userProfileUri);
