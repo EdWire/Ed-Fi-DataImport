@@ -103,9 +103,12 @@ public static class Extensions
         //    CookieContainer = cookies
         //};
 
+        var customHost = "login.edgraph.dev";
+
         foreach (var cookie in httpContext.Request.Cookies)
         {
-            cookies.Add(new Cookie(cookie.Key, cookie.Value, "/", httpContext.Request.Host.Host));
+            logger.LogInformation($"Cookie Key:{cookie.Key}, custom Host:{customHost}, used Host {httpContext.Request.Host.Host}");
+            cookies.Add(new Cookie(cookie.Key, cookie.Value, "/", customHost));
         }
 
         //var clientHandler = new HttpClientHandler { CookieContainer = cookies };
