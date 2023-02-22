@@ -1,10 +1,10 @@
 {
   "Serilog": {
     "MinimumLevel": {
-      "Default": "Information",
+      "Default": "Debug",
       "Override": {
-        "Microsoft": "Warning",
-        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft": "Debug",
+        "Microsoft.Hosting.Lifetime": "Debug",
         "WebOptimizer": "Warning"
       }
     },

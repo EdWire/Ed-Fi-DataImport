@@ -136,14 +136,17 @@ public static class Extensions
             }
             else
             {
+                logger.LogInformation($"IdSrvCheckSession GET call Is Successful  StatusCode: {response.StatusCode} Content: {response.Content}");
+
                 var resultContent = response.Content;
                 var sessionValid = JsonConvert.DeserializeObject<bool>(response.Content);
                 if (sessionValid) return true;
                 else return false;
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            logger.LogInformation($"IdSrvCheckSession GET call Exception : {e}");
             return false;
         }
     }

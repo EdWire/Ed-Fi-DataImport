@@ -55,7 +55,11 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
         if (resultAccessTokenRefresh != true) return false;
 
         // Note: Need to handle idSrv session expiry and need for login
+        _logger.LogInformation($"Variable _userIdSrvCheckSessionUri value: {_userIdSrvCheckSessionUri}.");
+        _logger.LogInformation($"Before Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
         var isUserSessionValid = await httpContext.GetEdGraphUserIdSrvCheckSessionAsync(_logger, _userIdSrvCheckSessionUri);
+        _logger.LogInformation($"After Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
+
         if (!isUserSessionValid)
         {
             await httpContext.ManualLogOut(_logger);
