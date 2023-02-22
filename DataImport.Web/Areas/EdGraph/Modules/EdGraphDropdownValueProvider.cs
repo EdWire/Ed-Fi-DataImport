@@ -19,6 +19,7 @@ public class EdGraphDropdownValueProvider : IInstanceDropdownValueProvider
     private readonly string _userProfileInstanceIdKey;
     private readonly string _instanceSwitchUri;
     private readonly string _instanceSwitchRedirectUri;
+    private readonly string _instanceSwitchFailureRedirectUri;
 
     public EdGraphDropdownValueProvider(IConfiguration configuration, ILogger<EdGraphDropdownValueProvider> logger)
     {
@@ -28,6 +29,7 @@ public class EdGraphDropdownValueProvider : IInstanceDropdownValueProvider
         _userProfileInstanceIdKey = configuration["EdGraph:Instance:UserProfileInstanceIdKey"];
         _instanceSwitchUri = configuration["EdGraph:Instance:InstanceSwitchUri"];
         _instanceSwitchRedirectUri = configuration["EdGraph:Instance:InstanceSwitchRedirectUri"];
+        _instanceSwitchFailureRedirectUri = configuration["EdGraph:Instance:InstanceSwitchFailureRedirectUri"];
     }
 
     public async Task<InstancesDropdown> GetDropdown(HttpContext httpContext)
@@ -40,7 +42,7 @@ public class EdGraphDropdownValueProvider : IInstanceDropdownValueProvider
             return new InstancesDropdown
             {
                 SelectedInstanceName = userProfile.Tenants.Single(tenant => tenant.TenantId == usrPrfInstanceId.Value).OrganizationName,
-                Instances = userProfile.Tenants.Select(tenant => $"<a href=\"{_instanceSwitchUri}?tenantId={tenant.TenantId}&redirectUri={_instanceSwitchRedirectUri}&requestTime={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}\">{tenant.OrganizationName}</a>").ToList()
+                Instances = userProfile.Tenants.Select(tenant => $"<a href=\"{_instanceSwitchUri}?tenantId={tenant.TenantId}&redirectUri={_instanceSwitchRedirectUri}&failureRedirectUri={_instanceSwitchFailureRedirectUri}&requestTime={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}\">{tenant.OrganizationName}</a>").ToList()
             };
         }
         catch (Exception ex)

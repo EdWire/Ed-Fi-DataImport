@@ -5,23 +5,36 @@
 
 using System;
 using System.Threading.Tasks;
+using DataImport.Web.Areas.EdGraph;
 using DataImport.Web.Helpers;
 using DataImport.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DataImport.Web.Features.OpenIdConnect;
 
 public class OpenIdConnectController : BaseController
 {
+    private readonly ILogger _logger;
+    private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IdentitySettings _identitySettings;
+    private readonly string _instanceSwitchRedirectUri;
 
-    public OpenIdConnectController(IOptions<IdentitySettings> identitySettings)
+    public OpenIdConnectController(IOptions<IdentitySettings> identitySettings,
+        IConfiguration configuration,
+        ILogger logger,
+        IAuthenticationSchemeProvider schemeProvider)
     {
         _identitySettings = identitySettings.Value;
+        _schemeProvider = schemeProvider;
+        _logger = logger;
+        _instanceSwitchRedirectUri = configuration["EdGraph:Instance:InstanceSwitchRedirectUri"];
     }
 
     [HttpGet]
@@ -65,5 +78,15 @@ public class OpenIdConnectController : BaseController
     {
         return Task.FromResult<IActionResult>(new SignOutResult(new[]
             {CookieAuthenticationDefaults.AuthenticationScheme, _identitySettings.OpenIdSettings.AuthenticationScheme}));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SwitchTenantFailed()
+    {
+        await HttpContext.ManualLogOut(_logger);
+        return Ok();
+        //var scheme = (await _schemeProvider.GetDefaultChallengeSchemeAsync()).Name;
+        //await HttpContext.SignOutAsync(scheme);
+        //return Redirect(_instanceSwitchRedirectUri);
     }
 }

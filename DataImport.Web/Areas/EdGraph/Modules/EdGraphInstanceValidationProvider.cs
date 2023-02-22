@@ -27,6 +27,7 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _jwtInstanceIdKey;
     private readonly string _userProfileUri;
+    private readonly string _userIdSrvCheckSessionUri;
     private readonly string _userProfileInstanceIdKey;
     private readonly string _instanceSwitchRedirectUri;
 
@@ -42,6 +43,7 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
         _httpClientFactory = httpClientFactory;
         _jwtInstanceIdKey = configuration["Instance:JwtInstanceIdKey"];
         _userProfileUri = configuration["EdGraph:Instance:UserProfileUri"];
+        _userIdSrvCheckSessionUri = configuration["EdGraph:Instance:UserIdSrvCheckSessionUri"];
         _userProfileInstanceIdKey = configuration["EdGraph:Instance:UserProfileInstanceIdKey"];
         _instanceSwitchRedirectUri = configuration["EdGraph:Instance:InstanceSwitchRedirectUri"];
     }
@@ -49,7 +51,16 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
     public async Task<bool> ValidateAsync(HttpContext httpContext)
     {
         // Note: Needed for replacement of expired access token
-        await RefreshAccessToken(httpContext);
+        var resultAccessTokenRefresh = await RefreshAccessToken(httpContext);
+        if (resultAccessTokenRefresh != true) return false;
+
+        // Note: Need to handle idSrv session expiry and need for login
+        //var isUserSessionValid = await httpContext.GetEdGraphUserIdSrvCheckSessionAsync(_logger, _userIdSrvCheckSessionUri);
+        //if (!isUserSessionValid)
+        //{
+        //    await httpContext.ManualLogOut(_logger);
+        //    return false;
+        //}
 
         var jwtInstanceId = await httpContext.GetJwtClaimBasedInstanceIdAsync(_jwtInstanceIdKey);
         var userProfile = await httpContext.GetEdGraphUserProfileAsync(_userProfileUri);
@@ -57,14 +68,16 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
         var usrPrfInstanceId = userProfile.Preferences.SingleOrDefault(x => x.Code == _userProfileInstanceIdKey);
         if (usrPrfInstanceId is null) throw new Exception($"User profile InstanceId not found");
 
+        //Note: Need when We switch tenant and are still using old access token with previous tenant
         if (jwtInstanceId != usrPrfInstanceId.Value)
         {
-            await ManualAccessTokenRefresh(httpContext);
+            var resultAccessTokenRefreshManual = await ManualAccessTokenRefresh(httpContext);
+            if (resultAccessTokenRefreshManual != true) return false;
         }
 
         return true;
 
-        async Task ManualAccessTokenRefresh(HttpContext httpContext)
+        async Task<bool> ManualAccessTokenRefresh(HttpContext httpContext)
         {
             try
             {
@@ -73,15 +86,18 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
                 var refreshTokenRequest = new RefreshTokenRequest { Address = configuration.TokenEndpoint, ClientId = oidcOptions.ClientId, ClientSecret = oidcOptions.ClientSecret };
                 await httpContext.UpdateEdGraphTokensAsync(_logger, _httpClientFactory, refreshTokenRequest);
                 httpContext.Response.Redirect(_instanceSwitchRedirectUri);  //PATCH: to make the app reload after correction
-                //_logger.LogInformation($"Manual user access token refresh succeeded.");
+                _logger.LogInformation($"Manual user access token refresh succeeded.");
+                return true;
             }
             catch (Exception e)
             {
-                throw new Exception($"Manual user access token refresh failed.{e}.");
+                _logger.LogError($"Manual user access token refresh failed.{e}.");
+                await httpContext.ManualLogOut(_logger);
+                return false;
             }
         }
 
-        async Task RefreshAccessToken(HttpContext httpContext)
+        async Task<bool> RefreshAccessToken(HttpContext httpContext)
         {
             var expiresAt = await httpContext.GetTokenAsync(ExpiresAtTokenName);
             if (string.IsNullOrEmpty(expiresAt))
@@ -92,8 +108,10 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
 
             if (dtRefresh < _clock.UtcNow)
             {
-                await ManualAccessTokenRefresh(httpContext);
+                return await ManualAccessTokenRefresh(httpContext);
             }
+
+            return true;
         }
     }
 }
