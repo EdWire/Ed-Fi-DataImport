@@ -10,6 +10,7 @@ using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -30,6 +31,7 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
     private readonly string _userIdSrvCheckSessionUri;
     private readonly string _userProfileInstanceIdKey;
     private readonly string _instanceSwitchRedirectUri;
+    private readonly string _instanceSwitchFailureRedirectUri;
 
     public EdGraphInstanceValidationProvider(IConfiguration configuration,
         ILogger<EdGraphInstanceValidationProvider> logger,
@@ -46,6 +48,7 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
         _userIdSrvCheckSessionUri = configuration["EdGraph:Instance:UserIdSrvCheckSessionUri"];
         _userProfileInstanceIdKey = configuration["EdGraph:Instance:UserProfileInstanceIdKey"];
         _instanceSwitchRedirectUri = configuration["EdGraph:Instance:InstanceSwitchRedirectUri"];
+        _instanceSwitchFailureRedirectUri = configuration["EdGraph:Instance:InstanceSwitchFailureRedirectUri"]; 
     }
 
     public async Task<bool> ValidateAsync(HttpContext httpContext)
@@ -54,11 +57,32 @@ public class EdGraphInstanceValidationProvider : IInstanceValidationProvider
         var resultAccessTokenRefresh = await RefreshAccessToken(httpContext);
         if (resultAccessTokenRefresh != true) return false;
 
-        // Note: Need to handle idSrv session expiry and need for login
-        _logger.LogInformation($"Variable _userIdSrvCheckSessionUri value: {_userIdSrvCheckSessionUri}.");
-        _logger.LogInformation($"Before Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
-        var isUserSessionValid = await httpContext.GetEdGraphUserIdSrvCheckSessionAsync(_logger, _userIdSrvCheckSessionUri);
-        _logger.LogInformation($"After Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
+        var isUserSessionCookieValid = httpContext.GetEdGraphUserIdSrvCheckSessionCookieAsync(_userIdSrvCheckSessionUri, _instanceSwitchFailureRedirectUri);
+        if (!isUserSessionCookieValid) return false;
+
+        //// Note: Need to handle idSrv session expiry and need for login
+        //var idSrvMasterSessionCheckIsPresent = httpContext.Request.Cookies.ContainsKey("idsrv.mastersessioncheck");
+        //if (!idSrvMasterSessionCheckIsPresent)
+        //{
+        //    var co = new CookieOptions
+        //    {
+        //        Expires = DateTimeOffset.UtcNow.AddMinutes(2),
+        //        MaxAge = TimeSpan.FromMinutes(2),
+        //        IsEssential = true
+        //    };
+
+        //    httpContext.Response.Cookies.Append("idsrv.mastersessioncheck", "na", co);
+        //    var redirectUri = httpContext.Request.GetEncodedUrl();
+        //    var location = $"{_userIdSrvCheckSessionUri}?redirectUri={redirectUri}&failureRedirectUri={_instanceSwitchFailureRedirectUri}&requestTime={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        //    httpContext.Response.Redirect(location);
+        //    return false;
+        //}
+
+
+        //_logger.LogInformation($"Variable _userIdSrvCheckSessionUri value: {_userIdSrvCheckSessionUri}.");
+        //_logger.LogInformation($"Before Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
+        //var isUserSessionValid = await httpContext.GetEdGraphUserIdSrvCheckSessionAsync(_logger, _userIdSrvCheckSessionUri);
+        //_logger.LogInformation($"After Method: {nameof(Extensions.GetEdGraphUserIdSrvCheckSessionAsync)}.");
 
         //if (!isUserSessionValid)
         //{

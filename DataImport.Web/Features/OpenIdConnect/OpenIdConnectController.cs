@@ -22,7 +22,6 @@ namespace DataImport.Web.Features.OpenIdConnect;
 public class OpenIdConnectController : BaseController
 {
     private readonly ILogger _logger;
-    private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IdentitySettings _identitySettings;
     private readonly string _instanceSwitchRedirectUri;
 
@@ -32,7 +31,6 @@ public class OpenIdConnectController : BaseController
         IAuthenticationSchemeProvider schemeProvider)
     {
         _identitySettings = identitySettings.Value;
-        _schemeProvider = schemeProvider;
         _logger = logger;
         _instanceSwitchRedirectUri = configuration["EdGraph:Instance:InstanceSwitchRedirectUri"];
     }
@@ -83,8 +81,21 @@ public class OpenIdConnectController : BaseController
     [HttpGet]
     public async Task<IActionResult> SwitchTenantFailed()
     {
+        var idSrvMasterSessionCheckIsPresent = HttpContext.Request.Cookies.ContainsKey(Extensions.IdSrvMasterSessionCheck);
+        if (idSrvMasterSessionCheckIsPresent)
+        {
+            var co = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddMinutes(-1),
+                MaxAge = TimeSpan.FromMinutes(-1),
+                IsEssential = true
+            };
+
+            HttpContext.Response.Cookies.Delete(Extensions.IdSrvMasterSessionCheck, co);
+        }
+
         await HttpContext.ManualLogOut(_logger);
-        return Ok();
+        return Redirect(_instanceSwitchRedirectUri);
         //var scheme = (await _schemeProvider.GetDefaultChallengeSchemeAsync()).Name;
         //await HttpContext.SignOutAsync(scheme);
         //return Redirect(_instanceSwitchRedirectUri);

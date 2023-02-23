@@ -9,6 +9,7 @@ using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json;
@@ -21,6 +22,8 @@ public static class Extensions
     //public static readonly List<string> AuthSchemes = new() { "Cookies", "oidc" };
     public static readonly string OidcAuthenticationScheme = "oidc";
     private const string AccessTokenName = "access_token";
+    public static string IdSrvMasterSessionCheck = "idsrv.mastersessioncheck";
+
 
     public static async Task<UserProfile> GetEdGraphUserProfileAsync(this HttpContext httpContext, string userProfileUri)
     {
@@ -94,65 +97,85 @@ public static class Extensions
         //    _logger.LogWarning($"Not Expected Auth Scheme: {schemeItem.Name}");
         //}
     }
-
-    public static async Task<bool> GetEdGraphUserIdSrvCheckSessionAsync(this HttpContext httpContext, ILogger logger, string userIdSrvCheckSessionUri)
+    public static bool GetEdGraphUserIdSrvCheckSessionCookieAsync(this HttpContext httpContext, string userIdSrvCheckSessionUri, string instanceSwitchFailureRedirectUri)
     {
-        CookieContainer cookies = new CookieContainer(); //this container saves cookies from responses and send them in requests
-        //var handler = new HttpClientHandler
-        //{
-        //    CookieContainer = cookies
-        //};
-
-        var customHost = "login.edgraph.dev";
-
-        foreach (var cookie in httpContext.Request.Cookies)
+        var idSrvMasterSessionCheckIsPresent = httpContext.Request.Cookies.ContainsKey(IdSrvMasterSessionCheck);
+        if (!idSrvMasterSessionCheckIsPresent)
         {
-            logger.LogInformation($"Cookie Key:{cookie.Key}, custom Host:{customHost}, used Host {httpContext.Request.Host.Host}");
-            cookies.Add(new Cookie(cookie.Key, cookie.Value, "/", customHost));
-        }
-
-        //var clientHandler = new HttpClientHandler { CookieContainer = cookies };
-        //using (var httpClient = new HttpClient(clientHandler)) { }
-
-
-        var token = await httpContext.GetTokenAsync(AccessTokenName);
-        if (string.IsNullOrEmpty(token))
-            return false;
-
-        var client = new RestClient(userIdSrvCheckSessionUri);
-
-        client.CookieContainer = cookies;
-
-        var request = new RestRequest(Method.GET);
-        request.AddHeader("Accept", "application/json");
-        request.AddHeader("Content-Type", "application/json");
-        //request.AddHeader("Authorization", $"Bearer {token}");
-
-        try
-        {
-            IRestResponse response = await client.ExecuteAsync(request);
-
-            if (!response.IsSuccessful)
+            var co = new CookieOptions
             {
-                logger.LogWarning($"Please verify that the login provider has been correctly configured. StatusCode: {response.StatusCode} Content: {response.Content}");
-                return false;
-            }
-            else
-            {
-                logger.LogInformation($"IdSrvCheckSession GET call Is Successful  StatusCode: {response.StatusCode} Content: {response.Content}");
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15),
+                MaxAge = TimeSpan.FromMinutes(15),
+                IsEssential = true
+            };
 
-                var resultContent = response.Content;
-                var sessionValid = JsonConvert.DeserializeObject<bool>(response.Content);
-                if (sessionValid) return true;
-                else return false;
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogInformation($"IdSrvCheckSession GET call Exception : {e}");
+            httpContext.Response.Cookies.Append(IdSrvMasterSessionCheck, "na", co);
+            var redirectUri = httpContext.Request.GetEncodedUrl();
+            var location = $"{userIdSrvCheckSessionUri}?redirectUri={redirectUri}&failureRedirectUri={instanceSwitchFailureRedirectUri}&requestTime={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+            httpContext.Response.Redirect(location);
             return false;
         }
+        return true;
     }
+
+    //  public static async Task<bool> GetEdGraphUserIdSrvCheckSessionAsync(this HttpContext httpContext, ILogger logger, string userIdSrvCheckSessionUri)
+    //{
+    //    CookieContainer cookies = new CookieContainer(); //this container saves cookies from responses and send them in requests
+    //    //var handler = new HttpClientHandler
+    //    //{
+    //    //    CookieContainer = cookies
+    //    //};
+
+    //    var customHost = "login.edgraph.dev";
+
+    //    foreach (var cookie in httpContext.Request.Cookies)
+    //    {
+    //        logger.LogInformation($"Cookie Key:{cookie.Key}, custom Host:{customHost}, used Host {httpContext.Request.Host.Host}");
+    //        cookies.Add(new Cookie(cookie.Key, cookie.Value, "/", customHost));
+    //    }
+
+    //    //var clientHandler = new HttpClientHandler { CookieContainer = cookies };
+    //    //using (var httpClient = new HttpClient(clientHandler)) { }
+
+
+    //    var token = await httpContext.GetTokenAsync(AccessTokenName);
+    //    if (string.IsNullOrEmpty(token))
+    //        return false;
+
+    //    var client = new RestClient(userIdSrvCheckSessionUri);
+
+    //    client.CookieContainer = cookies;
+
+    //    var request = new RestRequest(Method.GET);
+    //    request.AddHeader("Accept", "application/json");
+    //    request.AddHeader("Content-Type", "application/json");
+    //    //request.AddHeader("Authorization", $"Bearer {token}");
+
+    //    try
+    //    {
+    //        IRestResponse response = await client.ExecuteAsync(request);
+
+    //        if (!response.IsSuccessful)
+    //        {
+    //            logger.LogWarning($"Please verify that the login provider has been correctly configured. StatusCode: {response.StatusCode} Content: {response.Content}");
+    //            return false;
+    //        }
+    //        else
+    //        {
+    //            logger.LogInformation($"IdSrvCheckSession GET call Is Successful  StatusCode: {response.StatusCode} Content: {response.Content}");
+
+    //            var resultContent = response.Content;
+    //            var sessionValid = JsonConvert.DeserializeObject<bool>(response.Content);
+    //            if (sessionValid) return true;
+    //            else return false;
+    //        }
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        logger.LogInformation($"IdSrvCheckSession GET call Exception : {e}");
+    //        return false;
+    //    }
+    //}
 
     public static async Task UpdateEdGraphTokensAsync(this HttpContext httpContext, ILogger logger, IHttpClientFactory httpClientFactory, RefreshTokenRequest refreshTokenRequest)
     {
