@@ -35,6 +35,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.DataProtection;
+using System.Security.Cryptography.X509Certificates;
+using System.IO;
+using StackExchange.Redis;
 
 namespace DataImport.Web
 {
@@ -105,6 +109,34 @@ namespace DataImport.Web
                     services.AddTransient<Areas.Instance.Modules.IInstanceDropdownValueProvider, Areas.EdGraph.Modules.EdGraphDropdownValueProvider>();
                     services.AddTransient<Areas.Instance.Modules.IInstancePostMigrationProcessingProvider, Areas.EdGraph.Modules.EdGraphInstancePostMigrationProcessingProvider>();
                     services.AddTransient<Areas.Instance.Modules.IInstanceValidationProvider, Areas.EdGraph.Modules.EdGraphInstanceValidationProvider>();
+
+                    var dataProtectionOptions = Configuration.GetSection("EdGraph:DataProtection").Get<DataProtectionOptions>();
+
+                    if (dataProtectionOptions.IsClusterEnvironment)
+                    {
+                        // Get Certificate for IdentityServer encryption
+                        var certPem = System.IO.File.ReadAllText(dataProtectionOptions.PemCertFilePath);
+                        var keyPem = System.IO.File.ReadAllText(dataProtectionOptions.PemKeyFilePath);
+
+                        X509Certificate2 dataProtectionCertificate = X509Certificate2.CreateFromPem(
+                            certPem, //The text of the PEM-encoded X509 certificate.
+                            keyPem //The text of the PEM-encoded private key.
+                        );
+
+                        // Data Protection (Allow Cookie Decryption when using multiple nodes)
+                        services.AddDataProtection(opts =>
+                        {
+                            opts.ApplicationDiscriminator = "edgraph.dataimport";
+                        })
+                        .PersistKeysToStackExchangeRedis(ConnectionMultiplexer.Connect(dataProtectionOptions.KeyConnectionString), dataProtectionOptions.KeyName)
+                        .ProtectKeysWithCertificate(dataProtectionCertificate);
+
+                        services.AddStackExchangeRedisCache(option =>
+                        {
+                            option.Configuration = dataProtectionOptions.KeyConnectionString;
+                            option.InstanceName = "edgraph.dataimport.redisinstance";
+                        });
+                    }
                 }
                 services.AddTransient<Areas.Instance.Modules.IDatabaseConnectionStringProvider, Areas.Instance.Modules.DefaultJwtClaimBasedInstanceConnectionStringProvider>();
                 services.AddDbContext<DataImportDbContext, Areas.Instance.Models.InstanceSqlDataImportDbContext>();

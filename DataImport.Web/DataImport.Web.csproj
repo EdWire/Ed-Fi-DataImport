@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -61,9 +61,23 @@
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Postgresql.Alternative" Version="3.4.1" />
     <PackageReference Include="SSH.NET" Version="2020.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.12" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.96" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DataImport.Web.nuspec" CopyToPublishDirectory="Always" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Areas\EdGraph\Certificates\dataencipherment.local.service.crt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\EdGraph\Certificates\dataencipherment.local.service.key">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\EdGraph\Certificates\dataencipherment.local.service.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -22,7 +22,7 @@ public static class Extensions
     //public static readonly List<string> AuthSchemes = new() { "Cookies", "oidc" };
     public static readonly string OidcAuthenticationScheme = "oidc";
     private const string AccessTokenName = "access_token";
-    public static string IdSrvMasterSessionCheck = "idsrv.mastersessioncheck";
+    public static string IdSrvMasterSessionCheck = "edgraph.dataimport.idsrv.session";
 
 
     public static async Task<UserProfile> GetEdGraphUserProfileAsync(this HttpContext httpContext, string userProfileUri)
