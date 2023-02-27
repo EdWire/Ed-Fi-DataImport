@@ -1,11 +1,11 @@
 {
   "Serilog": {
     "MinimumLevel": {
-      "Default": "Debug",
+      "Default": "Information",
       "Override": {
-        "Microsoft": "Debug",
-        "Microsoft.Hosting.Lifetime": "Debug",
-        "WebOptimizer": "Debug"
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "WebOptimizer": "Warning"
       }
     },
     "Using":  [ "Serilog.Sinks.Console"],
