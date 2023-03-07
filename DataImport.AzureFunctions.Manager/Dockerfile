@@ -1,11 +1,13 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated7.0-slim AS base
+FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-nightly-dotnet-isolated7.0-slim AS base
 WORKDIR /home/site/wwwroot
 EXPOSE 80
+FROM mcr.microsoft.com/dotnet/runtime:7.0-bullseye-slim AS runtime7.0
+#FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime7.0
+FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim  AS build
+#FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
-FROM mcr.microsoft.com/dotnet/runtime:7.0 as runtime7.0
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 # Copy .NET Core 7.0 runtime from the 7.0 image
 COPY --from=runtime7.0 /usr/share/dotnet/host /usr/share/dotnet/host
 COPY --from=runtime7.0 /usr/share/dotnet/shared /usr/share/dotnet/shared
