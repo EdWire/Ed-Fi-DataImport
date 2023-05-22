@@ -27,7 +27,7 @@ namespace DataImport.Server.TransformLoad.Features.Events
             protected override void Handle(Command notification)
             {
                 var jobStatus = _dbContext.EnsureSingle<JobStatus>();
-                jobStatus.Started = DateTimeOffset.Now;
+                jobStatus.Started = DateTimeOffset.UtcNow;
                 jobStatus.Completed = null;
                 _dbContext.SaveChanges();
             }
