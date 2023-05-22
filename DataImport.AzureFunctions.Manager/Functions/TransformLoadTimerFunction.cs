@@ -38,8 +38,9 @@ public class TransformLoadTimerFunction
 
         foreach (var dbName in dataImportDbs)
         {
+            var isPendingAgentSchedules = DbExtensions.ScanDataImportPendingAgentSchedules(dbName);
             var isPendingFiles = DbExtensions.ScanDataImportPendingFiles(dbName);
-            if (!isPendingFiles) continue;
+            if (!isPendingFiles && !isPendingAgentSchedules) continue;
             await queueClient.SendMessageAsync($"{dbName}");
         }
 

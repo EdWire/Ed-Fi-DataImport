@@ -55,6 +55,7 @@ namespace DataImport.Web.Features.Activity
         {
             public int? ApiServerId { get; set; }
             public int? ApiVersionId { get; set; }
+            public int? BrowserDateTimeOffSet { get; set; }
         }
 
         public class QueryHandler : RequestHandler<Query, ViewModel>
@@ -73,12 +74,12 @@ namespace DataImport.Web.Features.Activity
             protected override ViewModel Handle(Query request) =>
                 new ViewModel
                 {
-                    Health = JobHealth(),
+                    Health = JobHealth(request),
                     Files = Files(request.ApiServerId),
                     HasRecentFiles = HasRecentFiles()
                 };
 
-            private HealthModel JobHealth()
+            private HealthModel JobHealth(Query request = null)
             {
                 var jobStatus = _database.EnsureSingle<JobStatus>();
 
@@ -93,6 +94,21 @@ namespace DataImport.Web.Features.Activity
                     return Ok($"{Job} has been running for {duration}.");
 
                 duration = (jobStatus.Completed.Value - jobStatus.Started.Value).ToReadableDuration();
+
+                //NOTE: Test Code
+                //var job = jobStatus.Started.Value;
+                //var joboffset = jobStatus.Started.Value.ToOffset(TimeSpan.FromMinutes(Convert.ToDouble(request.BrowserDateTimeOffSet)));
+
+                //Note: Patch for browser based offset
+                if (request is not null && request.BrowserDateTimeOffSet.HasValue)
+                {
+                    var browserOffset = TimeSpan.FromMinutes(Convert.ToDouble(request.BrowserDateTimeOffSet));
+                    var utcDateTime = jobStatus.Started.Value.UtcDateTime; //Change Server Time to UTC Time
+                    var utcDateTimeOffSet = new DateTimeOffset(utcDateTime, TimeSpan.Zero);
+                    var browserDateTimeOffSet = utcDateTimeOffSet.ToOffset(browserOffset);//Change UTC Time to Browser Time
+
+                    jobStatus.Started = browserDateTimeOffSet;
+                }
 
                 return Ok($"{Job} started at {Time(jobStatus.Started)} and ran for {duration}.");
             }

@@ -379,9 +379,11 @@ See the LICENSE and NOTICES files in the project root for more information.
 
         function refreshElement(selector, url, delay) {
             function loadElement() {
+                var urlWithOffset = url + "?BrowserDateTimeOffSet=" + new Date().getTimezoneOffset();
+                log(urlWithOffset);
                 $.ajax({
                     type: "GET",
-                    url: url,
+                    url: urlWithOffset,
                     dataType: 'html',
                     success: function (data, status, response) {
                         if (handleAjaxGetRedirect(data, response)) {
