@@ -29,7 +29,7 @@ namespace DataImport.Server.TransformLoad.Features
         public static bool ShouldExecuteOnSchedule(Agent agent, DateTimeOffset? nowDate = null)
         {
             if (!nowDate.HasValue)
-                nowDate = DateTimeOffset.Now;
+                nowDate = DateTimeOffset.UtcNow;
 
             var shouldRun = false;
 
@@ -42,12 +42,20 @@ namespace DataImport.Server.TransformLoad.Features
                                                         orderby schedules.Day ascending, schedules.Hour ascending, schedules.Minute ascending
                                                         select schedules;
 
+            DateTimeOffset? agentLastExecuted = default;
+            //NOTE: UTC Patch for to convert server time to utc time
+            if (agent.LastExecuted.HasValue)
+            {
+                var utcDateTime = agent.LastExecuted.Value.UtcDateTime; //Change Server Time to UTC Time
+                agentLastExecuted = new DateTimeOffset(utcDateTime, TimeSpan.Zero);
+            }
+
             foreach (AgentSchedule schedule in sortedSchedule)
             {
                 var scheduleDateTime = DateTime.Parse(nowDate.Value.Date.ToShortDateString() + " " + schedule.Hour + ":" + schedule.Minute);
                 scheduleDateTime = scheduleDateTime.AddDays(-((int) nowDate.Value.DayOfWeek - schedule.Day));
 
-                if (!agent.LastExecuted.HasValue || scheduleDateTime > agent.LastExecuted)
+                if (!agentLastExecuted.HasValue || scheduleDateTime > agentLastExecuted)
                 {
                     if (schedule.Day <= nowDay)
                     {

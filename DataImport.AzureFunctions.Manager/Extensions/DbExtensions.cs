@@ -180,7 +180,7 @@ namespace DataImport.AzureFunctions.Manager.Extensions
 
             var shouldRun = false;
 
-            DateTimeOffset? nowDate = DateTimeOffset.Now;
+            DateTimeOffset? nowDate = DateTimeOffset.UtcNow;
             var nowDay = (int) nowDate.Value.DayOfWeek;
             var nowHour = nowDate.Value.Hour;
             var nowMinute = nowDate.Value.Minute;
@@ -196,8 +196,14 @@ namespace DataImport.AzureFunctions.Manager.Extensions
                     var scheduleMinute = row.Field<int>(2);
 
                     DateTimeOffset? agentLastExecuted = null;
-                    if(!row.IsNull(3))
+                    if (!row.IsNull(3))
                         agentLastExecuted = row.Field<DateTimeOffset>(3);
+
+                    if (agentLastExecuted is not null)
+                    {
+                        var utcDateTime = agentLastExecuted.Value.UtcDateTime; //Change Server Time to UTC Time
+                        agentLastExecuted = new DateTimeOffset(utcDateTime, TimeSpan.Zero);
+                    }
 
                     var scheduleDateTime = DateTime.Parse(nowDate.Value.Date.ToShortDateString() + " " + scheduleHour + ":" + scheduleMinute);
                     scheduleDateTime = scheduleDateTime.AddDays(-((int) nowDate.Value.DayOfWeek - scheduleDay));

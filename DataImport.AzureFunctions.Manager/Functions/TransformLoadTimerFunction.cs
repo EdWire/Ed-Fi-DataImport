@@ -40,7 +40,10 @@ public class TransformLoadTimerFunction
         {
             var isPendingAgentSchedules = DbExtensions.ScanDataImportPendingAgentSchedules(dbName);
             var isPendingFiles = DbExtensions.ScanDataImportPendingFiles(dbName);
+
+            _logger.LogInformation($"For Db:{dbName}, isPendingAgentSchedules is: {isPendingAgentSchedules} and isPendingFiles: {isPendingFiles}");
             if (!isPendingFiles && !isPendingAgentSchedules) continue;
+
             await queueClient.SendMessageAsync($"{dbName}");
         }
 
