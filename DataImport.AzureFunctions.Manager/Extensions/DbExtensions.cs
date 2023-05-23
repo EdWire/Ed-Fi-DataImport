@@ -191,6 +191,9 @@ namespace DataImport.AzureFunctions.Manager.Extensions
                 foreach (DataRow row in agentSchedules.Rows)
                 {
                     //TODO: Properly get column numbers
+                    if (row.IsNull(0) || row.IsNull(1) || row.IsNull(2))
+                        continue;
+
                     var scheduleDay = row.Field<int>(0);
                     var scheduleHour = row.Field<int>(1);
                     var scheduleMinute = row.Field<int>(2);
