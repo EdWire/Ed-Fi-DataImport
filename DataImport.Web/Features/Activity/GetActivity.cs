@@ -95,22 +95,18 @@ namespace DataImport.Web.Features.Activity
 
                 duration = (jobStatus.Completed.Value - jobStatus.Started.Value).ToReadableDuration();
 
-                //NOTE: Test Code
-                //var job = jobStatus.Started.Value;
-                //var joboffset = jobStatus.Started.Value.ToOffset(TimeSpan.FromMinutes(Convert.ToDouble(request.BrowserDateTimeOffSet)));
-
                 //Note: Patch for browser based offset
+                DateTimeOffset? browserDateTimeOffSet = null;
                 if (request is not null && request.BrowserDateTimeOffSet.HasValue)
                 {
-                    var browserOffset = TimeSpan.FromMinutes(Convert.ToDouble(request.BrowserDateTimeOffSet));
+                    var browserTimeSpan = Convert.ToDouble(-request.BrowserDateTimeOffSet); //C# UTC (+5:00) is in JS (-300). Notice the conversion in - sign.
+                    var browserOffset = TimeSpan.FromMinutes(browserTimeSpan);
                     var utcDateTime = jobStatus.Started.Value.UtcDateTime; //Change Server Time to UTC Time
                     var utcDateTimeOffSet = new DateTimeOffset(utcDateTime, TimeSpan.Zero);
-                    var browserDateTimeOffSet = utcDateTimeOffSet.ToOffset(browserOffset);//Change UTC Time to Browser Time
-
-                    jobStatus.Started = browserDateTimeOffSet;
+                    browserDateTimeOffSet = utcDateTimeOffSet.ToOffset(browserOffset);//Change UTC Time to Browser Time
                 }
-
-                return Ok($"{Job} started at {Time(jobStatus.Started)} and ran for {duration}.");
+                var startedDateTime = browserDateTimeOffSet is null ? jobStatus.Started : browserDateTimeOffSet;
+                return Ok($"{Job} started at {Time(startedDateTime)} and ran for {duration}.");
             }
 
             private FileModel[] Files(int? apiServerId)
