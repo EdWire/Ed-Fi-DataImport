@@ -1,22 +1,26 @@
 version: '3.4'
 
 services:
-  dataimport.web:
+  dataimport-web:
     image: dataimportweb
     build:
       context: .
       dockerfile: DataImport.Web/Dockerfile
-    container_name: dataimport.web
+    #image: ewcontainerscus.azurecr.io/edfi/dataimport-web:alpine-sql-v2.0.0-instance.latest
+    container_name: "dataimport-web"
+    hostname: dataimportweb
     restart: unless-stopped
     volumes:
       - /c/shared/dataimport/temp:/tmp/dataimport/share
       #- c/work/shared/dataimport/temp:/tmp/dataimport/share
     environment:
+      - DOTNET_ENVIRONMENT=Development
       - ASPNETCORE_ENVIRONMENT=Development
       - AppSettings__DatabaseEngine=SqlServer
       - AppSettings__Mode=InstanceYearSpecific
       - AppSettings__AllowTestCertificates=true
-      - AppSettings__ShareName=/tmp/dataimport/share
+      #- AppSettings__ShareName=/tmp/dataimport/share
+      - EdGraph__DataProtection__IsClusterEnvironment=false
       - IdentitySettings__Type=OpenId
       #- IdentitySettings__OpenIdSettings__Authority=http://localhost:5305
       - IdentitySettings__OpenIdSettings__Authority=http://host.docker.internal:5305
@@ -30,31 +34,50 @@ services:
       - IdentitySettings__OpenIdSettings__Scopes__5=https://api.edgraph.com/auth/tenant
       - IdentitySettings__OpenIdSettings__RoleClaimValue=DataImport.Admin
       - Instance__JwtInstanceIdKey=tenantid
-      - EdGraph__Enabled=yes
+      - ConnectionStrings__defaultConnection=Server=host.docker.internal,1433; Database=EdFi_{0}; User ID=sa;Password=Lp&Oly3Jq!9Z0rG@;Integrated Security=false;Encrypt=True; Persist Security Info=True;Connection Timeout=3600;Command Timeout=3600;TrustServerCertificate=true;
+      - AppSettings__FileMode=Azure
+      - AppSettings__ShareName=dataimportlocal
+      - IdentitySettings__OpenIdSettings__UserProfileUri=http://host.docker.internal:5305/manage
+      - ConnectionStrings__storageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      #- EdGraph__Enabled=yes
       - EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-local-scus
-      - EdGraph__Instance__UserProfileInstanceIdKey=selectedtenantid
-      #- EdGraph__Instance__UserProfileUri=http://localhost:5102/me
-      - EdGraph__Instance__InstanceSwitchUri=http://localhost:5305/account/switchtenant
-      - EdGraph__Instance__InstanceSwitchRedirectUri=http://localhost:56322
+      #- EdGraph__Instance__UserProfileInstanceIdKey=selectedtenantid
       - EdGraph__Instance__UserProfileUri=http://host.docker.internal:5102/me
+      #- EdGraph__Instance__InstanceSwitchUri=http://localhost:5305/account/switchtenant
+      #- EdGraph__Instance__InstanceSwitchRedirectUri=http://localhost:56322
+      #- EdGraph__Instance__UserProfileUri=http://host.docker.internal:5102/me
       #- EdGraph__Instance__InstanceSwitchUri=http://host.docker.internal:5305/account/switchtenant
       #- EdGraph__Instance__InstanceSwitchRedirectUri=http://host.docker.internal:56322
-      - ConnectionStrings__defaultConnection=Server=host.docker.internal,1433; Database=EdFi_{0}; User ID=sa;Password=Lp&Oly3Jq!9Z0rG@;
+      - EdGraph__Enabled=yes
+      #- EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-dev-scus
+      - EdGraph__Instance__UserProfileInstanceIdKey=selectedtenantid
+      #- EdGraph__Instance__UserProfileUri=https://api.edgraph.dev/tenant/me
+      - EdGraph__Instance__UserIdSrvCheckSessionUri=http://host.docker.internal/account/checksession
+      - EdGraph__Instance__InstanceSwitchUri=http://host.docker.internal/account/switchtenant
+      - EdGraph__Instance__InstanceSwitchRedirectUri=http://localhost:56322/
+      - EdGraph__Instance__InstanceSwitchFailureRedirectUri=http://localhost:56322/OpenIdConnect/SwitchTenantFailed
+      - Serilog__MinimumLevel__Default=Debug
     ports:
       - "56322:80"
-      #- "56323:81"
+      #- "56323:443"
     networks:
       - edgraph
+      - elastic
 
-  dataimport.azurefunctions:
+  dataimport-azurefunctions:
     image: ${DOCKER_REGISTRY-}dataimportazurefunctions
     build:
       context: .
       dockerfile: DataImport.AzureFunctions/Dockerfile
+    #image: ewcontainerscus.azurecr.io/edfi/dataimport-web/azure-functions:bullseye-slim-azurefunctions.latest
+    container_name: "dataimport-azurefunctions"
+    hostname: dataimportazurefunctions
+    restart: unless-stopped
     environment:
       - DOTNET_ENVIRONMENT=Development
       - ASPNETCORE_ENVIRONMENT=Development
       - FUNCTIONS_WORKER_RUNTIME=dotnet-isolated
+      - WEBSITE_HOSTNAME=dataimportazurefunctions
       - AzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
       - ConnectionStrings__storageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
       - ConnectionStrings__defaultConnection=server=host.docker.internal;database=EdFi_{0};User Id=sa;Password=Lp&Oly3Jq!9Z0rG@;Application Name=EdFi.Ods.WebApi;Integrated Security=false;TrustServerCertificate=True;
@@ -64,8 +87,55 @@ services:
       - ConnectionStringsStorageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
       - EdGraphStorageConnectionQueueName=dataimport-transformload-queue
       - EdGraphTransformLoadTimerTrigger=0 */5 * * * *
-      
+      #- ConnectionStrings__storageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      #- ConnectionStrings__defaultConnection=Server=$(SQLSERVER_DATASOURCE);Database=EdFi_{0};User Id=$(SQLSERVER_USER);Password=$(SQLSERVER_PASSWORD);Integrated Security=false;Encrypt=True; Persist Security Info=True;Connection Timeout=3600;Command Timeout=3600;TrustServerCertificate=True;
+      #- AppSettings__DatabaseEngine=SqlServer
+      - AppSettings__Mode=InstanceYearSpecific
+      - AppSettings__FileMode=Azure
+      - AppSettings__ShareName=dataimportlocal
+      #- EdGraph__storageConnection__QueueName=dataimport-transformload-queue
+      #- EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-dev-scus
+      - Serilog__Using__1=Serilog.Sinks.MSSqlServer
+      - AppSettings__MinimumLevelIngestionLog=WARNING
+    networks:
+      - edgraph
+      - elastic
+
+  dataimport-azurefunctions-manager:
+    image: ${DOCKER_REGISTRY-}dataimportazurefunctionsmanager
+    build:
+      context: .
+      dockerfile: DataImport.AzureFunctions/Dockerfile
+    #image: ewcontainerscus.azurecr.io/edfi/dataimport-web/azure-functions-manager:bullseye-slim-azurefunctions-manager.latest
+    container_name: "dataimport-azurefunctions-manager"
+    hostname: dataimportazurefunctionsmanager
+    restart: unless-stopped
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Development
+      - FUNCTIONS_WORKER_RUNTIME=dotnet-isolated
+      - WEBSITE_HOSTNAME=dataimportazurefunctionsmanager
+      - AzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      - ConnectionStrings__storageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      - ConnectionStrings__defaultConnection=server=host.docker.internal;database=EdFi_{0};User Id=sa;Password=Lp&Oly3Jq!9Z0rG@;Application Name=EdFi.Ods.WebApi;Integrated Security=false;TrustServerCertificate=True;
+      - AppSettings__DatabaseEngine=SqlServer
+      - EdGraph__storageConnection__QueueName=dataimport-transformload-queue
+      - EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-dev-scus
+      - ConnectionStringsStorageConnection=DefaultEndpointsProtocol=https;AccountName=egakscooldevscus;AccountKey=INKSwint2Pdd0MsXukfXJFIKesLNiThQCIVI4SyL6oIGCge1q7qhtxXEWCptIQmWRzEceBzjaLli+ASt02opNA==;EndpointSuffix=core.windows.net
+      - EdGraphStorageConnectionQueueName=dataimport-transformload-queue
+      - EdGraphTransformLoadTimerTrigger=0 */5 * * * *
+      - AppSettings__Mode=InstanceYearSpecific
+      - AppSettings__FileMode=Azure
+      - AppSettings__ShareName=dataimportlocal
+    networks:
+      - edgraph
+      - elastic
+
 networks:
   edgraph:
     name: edgraph-network
+    external: true
+  elastic:
+    name: elastic
+    driver: bridge
     external: true

@@ -96,6 +96,7 @@ services:
       #- EdGraph__storageConnection__QueueName=dataimport-transformload-queue
       #- EdGraph__AzureSQL__ElasticPoolName=eg-mssql-elastic-01-dev-scus
       - Serilog__Using__1=Serilog.Sinks.MSSqlServer
+      - AppSettings__MinimumLevelIngestionLog=WARNING
     networks:
       - edgraph
       - elastic
