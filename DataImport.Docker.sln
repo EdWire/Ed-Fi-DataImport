@@ -38,6 +38,15 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.AzureFunctions", "DataImport.AzureFunctions\DataImport.AzureFunctions.csproj", "{FDC1E37F-C809-4C6A-AFC9-6121F5B4832B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataImport.AzureFunctions.Manager", "DataImport.AzureFunctions.Manager\DataImport.AzureFunctions.Manager.csproj", "{5D739C6A-F1F3-46A9-8A9F-AAD3F5863D60}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{960ABA9F-9A3F-4581-872B-FF156E1C262A}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines-azure-functions.yml = azure-pipelines-azure-functions.yml
+		azure-pipelines.yml = azure-pipelines.yml
+		docker-compose.custom.yml = docker-compose.custom.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +105,10 @@ Global
 		{FDC1E37F-C809-4C6A-AFC9-6121F5B4832B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDC1E37F-C809-4C6A-AFC9-6121F5B4832B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDC1E37F-C809-4C6A-AFC9-6121F5B4832B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D739C6A-F1F3-46A9-8A9F-AAD3F5863D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D739C6A-F1F3-46A9-8A9F-AAD3F5863D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D739C6A-F1F3-46A9-8A9F-AAD3F5863D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D739C6A-F1F3-46A9-8A9F-AAD3F5863D60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

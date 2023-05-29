@@ -1,10 +1,16 @@
 {
-  "profiles": {
-    "DataImport.Server.TransformLoad (Prod)": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Production"
-      }
+    "profiles": {
+        "DataImport.Server.TransformLoad (Local)": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        "DataImport.Server.TransformLoad (Prod)": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Production"
+            }
+        }
     }
-  }
 }
