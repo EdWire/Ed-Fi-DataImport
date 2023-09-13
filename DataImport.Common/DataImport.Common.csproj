@@ -32,6 +32,7 @@
     <PackageReference Include="Rijndael256" Version="3.2.0" />
     <PackageReference Include="Serilog" Version="2.12.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0.4" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
 
     <!-- security vulnerabilities correct version of nuget dependencies-->
@@ -42,6 +43,7 @@
     <PackageReference Include="System.Net.Http.WinHttpHandler" Version="7.0.0" />
     <PackageReference Include="System.Net.Security" Version="4.3.2" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.7" />
 
   </ItemGroup>
   <ItemGroup>
