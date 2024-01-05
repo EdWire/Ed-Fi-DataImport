@@ -17,6 +17,7 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Azure.Identity" Version="1.10.4" />
         <PackageReference Include="Azure.Storage.Queues" Version="12.17.1" />
         <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
         <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
