@@ -33,8 +33,12 @@ stages:
           command: login
           containerRegistry: 'ewcontainerscus'
       - task: Docker@2
+        displayName: Login to ACR
         inputs:
-          containerRegistry: 'ewcontainerscus'
+          command: login
+          containerRegistry: 'eginfracrproductionusc'
+      - task: Docker@2
+        inputs:
           repository: 'edfi/dataimport-web/azure-functions'
           command: 'buildAndPush'
           Dockerfile: '$(Build.SourcesDirectory)/DataImport.AzureFunctions/Dockerfile'
@@ -44,7 +48,6 @@ stages:
             bullseye-slim-azurefunctions.latest
       - task: Docker@2
         inputs:
-          containerRegistry: 'ewcontainerscus'
           repository: 'edfi/dataimport-web/azure-functions-manager'
           command: 'buildAndPush'
           Dockerfile: '$(Build.SourcesDirectory)/DataImport.AzureFunctions.Manager/Dockerfile'
@@ -52,6 +55,11 @@ stages:
           tags: |
             bullseye-slim-azurefunctions-manager-v1.$(Build.BuildNumber)
             bullseye-slim-azurefunctions-manager.latest
+      - task: Docker@2
+        displayName: Logout of ACR
+        inputs:
+          command: logout
+          containerRegistry: eginfracrproductionusc
       - task: Docker@2
         displayName: Logout of ACR
         inputs:
