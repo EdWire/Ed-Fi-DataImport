@@ -61,6 +61,8 @@
         <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
         <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.8" />
+        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0.4" />
 
       
     </ItemGroup>
