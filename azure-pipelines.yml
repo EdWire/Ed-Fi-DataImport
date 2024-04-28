@@ -35,6 +35,11 @@ stages:
           command: login
           containerRegistry: 'eginfracrproductionusc'
       - task: Docker@2
+        displayName: Login to ACR
+        inputs:
+          command: login
+          containerRegistry: 'eginfracrdevelopmentusc'
+      - task: Docker@2
         inputs:
           repository: 'edfi/dataimport-web'
           command: 'buildAndPush'
@@ -48,6 +53,11 @@ stages:
         inputs:
           command: logout
           containerRegistry: eginfracrproductionusc
+      - task: Docker@2
+        displayName: Logout of ACR
+        inputs:
+          command: logout
+          containerRegistry: eginfracrdevelopmentusc
       - task: Docker@2
         displayName: Logout of ACR
         inputs:
