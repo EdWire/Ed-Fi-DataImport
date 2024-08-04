@@ -1,9 +1,12 @@
 {
   "dependencies": {
-    "@cucumber/cucumber": "^8.5.2",
-    "chromedriver": "^104.0.0",
-    "dotenv": "^16.0.1",
-    "playwright": "^1.25.1"
+    "@cucumber/cucumber": "^10.8.0",
+    "chromedriver": "^127.0.1",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.45.3"
+  },
+  "overrides": {
+    "semver": ">=7.5.2"
   },
   "description": "Playwright end-to-end test automation for Data Import. Using Commonjs, Cucumber and Assert.",
   "devDependencies": {

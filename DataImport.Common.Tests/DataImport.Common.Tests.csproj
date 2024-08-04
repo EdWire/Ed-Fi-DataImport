@@ -23,10 +23,11 @@
         <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
         <PackageReference Include="Shouldly" Version="4.0.3" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.41.0.50478">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.56.0.67649">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
     </ItemGroup>
     <ItemGroup>
         <None Update="PythonPreprocessors\PrintHello.py">
