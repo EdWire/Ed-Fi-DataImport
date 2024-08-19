@@ -3,6 +3,10 @@
 FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-nightly-dotnet-isolated7.0-slim AS base
 WORKDIR /home/site/wwwroot
 EXPOSE 80
+
+# Update packages
+RUN apt-get update && apt-get upgrade -y && apt-get clean
+
 FROM mcr.microsoft.com/dotnet/runtime:7.0-bullseye-slim AS runtime7.0
 #FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime7.0
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim  AS build

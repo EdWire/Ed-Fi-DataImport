@@ -5,6 +5,9 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+# Update packages
+RUN apt-get update && apt-get upgrade -y && apt-get clean
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS build
 WORKDIR /src
 COPY ["DataImport.Web/DataImport.Web.csproj", "DataImport.Web/"]
