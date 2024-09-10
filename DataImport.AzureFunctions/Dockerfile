@@ -1,11 +1,32 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-nightly-dotnet-isolated7.0-slim AS base
+
+# Update and clean packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /home/site/wwwroot
 EXPOSE 80
+
+
 FROM mcr.microsoft.com/dotnet/runtime:7.0-bullseye-slim AS runtime7.0
+# Update and clean packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 #FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime7.0
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim  AS build
+# Actualizar y limpiar los paquetes
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 #FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
 # Copy .NET Core 7.0 runtime from the 7.0 image
