@@ -12,17 +12,11 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/runtime:7.0-bullseye-slim AS runtime7.0
 # Update and clean packages
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim  AS build
 # Update and clean packages
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy .NET Core 7.0 runtime from the 7.0 image
 COPY --from=runtime7.0 /usr/share/dotnet/host /usr/share/dotnet/host
