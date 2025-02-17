@@ -51,6 +51,19 @@ namespace DataImport.Web
                 .UseSerilog(ConfigureLogger)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.ConfigureKestrel((builderContext, options) =>
+                    {
+                        var kestrelConfig = builderContext.Configuration.GetSection("Kestrel:Limits");
+                        if (kestrelConfig.Exists())
+                        {
+                            options.Limits.MaxRequestBodySize = kestrelConfig.GetValue<long>("MaxRequestBodySize");
+                        }
+                        else
+                        {
+                            options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
+                        }
+                    });
+
                     webBuilder.UseStartup<Startup>();
                 });
 
