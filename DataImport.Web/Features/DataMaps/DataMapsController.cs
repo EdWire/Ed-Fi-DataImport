@@ -141,7 +141,7 @@ namespace DataImport.Web.Features.DataMaps
         }
 
         [HttpPost]
-        [RequestSizeLimit(52428800)] // 50MB
+        //[RequestSizeLimit(52428800)] // 50MB
         public async Task<ActionResult> UploadFile(IFormFile uploadSampleFile, int dataMapId, int? preprocessorId, string mapName, int? apiVersionId, string resourcePath, int? apiServerId, string attribute)
         {
             var csvData = await _mediator.Send(new UploadCsvFile.Command { FileBase = uploadSampleFile, PreprocessorId = preprocessorId, ApiServerId = apiServerId, Attribute = attribute });
