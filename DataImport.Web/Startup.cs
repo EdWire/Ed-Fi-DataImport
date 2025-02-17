@@ -329,14 +329,14 @@ namespace DataImport.Web
 
             if (Configuration["AppSettings:Mode"] == "InstanceYearSpecific") app.UseMiddleware<Areas.Instance.Middleware.InstanceSqlDataImportDbContextMiddleware>();
 
-            app.UseMiddleware<LoggingMiddleware>();
+            //app.Use(async (context, next) =>
+            //{
+            //    var feature = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
+            //    if (feature != null) feature.MaxRequestBodySize = 50 * 1024 * 1024;
+            //    await next();
+            //});
 
-            app.Use(async (context, next) =>
-            {
-                var feature = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
-                if (feature != null) feature.MaxRequestBodySize = 50 * 1024 * 1024;
-                await next();
-            });
+            app.UseMiddleware<LoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
